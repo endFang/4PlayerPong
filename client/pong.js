@@ -84,6 +84,8 @@ Game.prototype.update = function ()
                 this.score(this.p1);
             }
         }
+        if (this.ball.y > this.height)
+            this.ball.vy = -this.ball.vy;
     }
 
 };
