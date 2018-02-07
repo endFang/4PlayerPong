@@ -11,6 +11,7 @@ function Game() {
     //initialize paddles
     this.p1 = new Paddle(this.width/2, 0, 100, 5);
     this.p1.y = this.height - this.p1.height*5;
+    this.score1 = new Display(this.width/4, 480)
 
 
     //initailzie the ball
@@ -21,15 +22,17 @@ function Game() {
     this.ball.vx = 5;
 }
 
+
+Game.prototype.score = function(p) {
+    p.score++;
+}
+
 Game.prototype.draw = function()
 {
     this.context.clearRect(0, 0, this.width, this.height);
-
     this.ball.draw(this.context);
-
     this.p1.draw(this.context);
-
-    
+    this.score1.draw(this.context);
 }
 
 Game.prototype.update = function ()
@@ -38,6 +41,8 @@ Game.prototype.update = function ()
         return;
 
     this.ball.update();
+
+    this.score1.value = this.p1.score;
     
     //control
     if (this.keys.isPressed(68))
@@ -76,6 +81,7 @@ Game.prototype.update = function ()
                 // this.ball.y = this.p1.y - this.ball.height;
                 // this.ball.x = Math.floor(this.ball.x-this.ball.vx+this.ball.vx*k);
                 this.ball.vy = -this.ball.vy;
+                this.score(this.p1);
             }
         }
     }
@@ -142,6 +148,19 @@ Ball.prototype.draw = function (p)
 
 
 
+//display
+function Display (x, y) {
+    this.x = x;
+    this.y = y;
+    this.value = 0;
+}
+
+Display.prototype.draw = function (p){
+    p.font = "20px Georgia";
+    p.fillText(this.value, this.x, this.y);
+    p.fillText(document.getElementById("userid").value, this.x, this.y+15);
+}
+
 //loop
 var game = new Game();
 function MainLoop() {
@@ -150,4 +169,4 @@ function MainLoop() {
     setTimeout(MainLoop, 33.3333);
 }
 
-MainLoop();
+// MainLoop();

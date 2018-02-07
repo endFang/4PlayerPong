@@ -13,7 +13,7 @@ function send( text ) {
 }
 
 function connect(){
-    // log('Connecting...');
+    log('Connecting...');
     Server = new FancyWebSocket('ws://' + document.getElementById('ip').value + ':' + document.getElementById('port').value);
 
     $('#message').keypress(function(e) {
@@ -43,4 +43,9 @@ function connect(){
     });
 
     Server.connect();
+}
+
+function disconnect(){
+    log("Disconnecting...");
+    Server.disconnect();
 }

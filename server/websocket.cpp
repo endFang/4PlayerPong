@@ -1,4 +1,4 @@
-#ifdef __linux__
+#ifdef __APPLE__
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>

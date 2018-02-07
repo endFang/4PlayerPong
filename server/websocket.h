@@ -1,7 +1,7 @@
 #ifndef WEBSOCKET_H
 #define WEBSOCKET_H
 
-#ifdef __linux__
+#ifdef __APPLE__
 #include <arpa/inet.h>
 #elif _WIN32
 #include <WinSock2.h>
