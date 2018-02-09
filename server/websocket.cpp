@@ -30,7 +30,7 @@ using namespace std;
 
 void showAvailableIP(){
 
-#ifdef __linux__
+#ifdef __APPLE__
 
     char name[INET_ADDRSTRLEN];
     struct ifaddrs *iflist;

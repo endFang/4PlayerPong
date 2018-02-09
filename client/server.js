@@ -44,7 +44,7 @@ function connect(){
         {
             log( payload );
             MainLoop();
-        }    
+        }
     });
 
     Server.connect();
@@ -58,19 +58,9 @@ function disconnect(){
 
 
 function startGame() {
+    send(document.getElementById("userid"));
     send("init");
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 //Pong
