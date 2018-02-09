@@ -14,7 +14,7 @@
 		#message {width:100%;line-height:20px}
 	</style>
 	<link rel="stylesheet" href="style.css" />
-	<script defer src="pong.js"></script>
+	<!-- <script defer src="pong.js"></script> -->
 	<script defer src="server.js"></script>
 
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
@@ -28,10 +28,13 @@
 	<div id='body'>
         Server ip: <input type='text' id='ip' name='ip'>
 		Server port: <input type='text' id='port' name='port'>
-        User ID: <input type='text' id='userid' name='userid'> <br/>
+        User ID: <input type='text' id='userid' name='userid'> <br>
 		
-		<button type="button" id='cntBtn' onclick="MainLoop();">Connect</button>
-		<button type="button" id='discntBtn' onclick="disconnect();">DisConnect</button> <br/>
+		<button type="button" id='cntBtn' onclick="connect();">Connect</button>
+		<button type="button" id='discntBtn' onclick="disconnect();">Disconnect</button> <br>
+
+		<button type="button" id='start' onclick="startGame();">Start</button>
+		<button type="button" id='quit' onclick="quitGame();">Quit</button> <br>
 
 		<canvas id="game" width=600 height=500></canvas>
 
@@ -41,13 +44,3 @@
 </body>
 
 </html>
-
-
-
-
-
-
-
-
-
-

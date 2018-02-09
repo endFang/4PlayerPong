@@ -61,12 +61,30 @@ void messageHandler(int clientID, string message){
     //os << "Stranger " << clientID << " says: " << message;
 
     vector<int> clientIDs = server.getClientIDs();
+    if (message == "init")
+    {
+        os << "init";
+        for (int i = 0; i < clientIDs.size(); i++){
+            server.wsSend(clientIDs[i], os.str());
+        }
+    }
+
 	if (message == "l") {
 		player1.posX = fmin(0, player1.posX - player1.speed);
+        os << "l";
+        for (int i = 0; i < clientIDs.size(); i++){
+            server.wsSend(clientIDs[i], os.str());
+        }
 	}
 	if (message == "r") {
 		player1.posX = fmax(canvas.first-player1.posX, player1.posX + player1.speed);
+        os << "r";
+        for (int i = 0; i < clientIDs.size(); i++){
+            server.wsSend(clientIDs[i], os.str());
+        }
 	}
+    
+    
 
 }
 
@@ -117,12 +135,12 @@ void periodicHandler() {
 		os << setfill('0') << setw(3) << player1.posX<< "_";
 		os << setfill('0') << setw(3) << player1.posY<< "_";
 		os << setfill('0') << setw(2) << player1.score;
-	vector<int> clientIDs = server.getClientIDs();
-	for (int i = 0; i < clientIDs.size(); i++){
-		server.wsSend(clientIDs[i], os.str());
-	}
-	next = time(NULL) + (float)0.3;
-	cout << os.str()<<std::endl;
+        vector<int> clientIDs = server.getClientIDs();
+        for (int i = 0; i < clientIDs.size(); i++){
+            server.wsSend(clientIDs[i], os.str());
+        }
+        next = time(NULL) + (float)0.3;
+	// cout << os.str()<<std::endl;
 	}
 	
 		/*
@@ -166,7 +184,7 @@ int main(int argc, char *argv[]){
 	server.setCloseHandler(closeHandler);
 	server.setMessageHandler(messageHandler);
 	server.setPeriodicHandler(periodicHandler);
-	server.startServer(1000);
+	server.startServer(8000);
     /* start the chatroom server, listen to ip '127.0.0.1' and port '8000' */
 
     return 1;

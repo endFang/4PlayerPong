@@ -39,10 +39,8 @@ function connect(){
 
     //Log any messages sent from server
     Server.bind('message', function( payload ) {
-        
         if (payload.trim() === "init")
         {
-            log( payload );
             MainLoop();
         }
     });
@@ -58,9 +56,11 @@ function disconnect(){
 
 
 function startGame() {
-    send(document.getElementById("userid"));
+    // send(document.getElementById("userid"));
     send("init");
 }
+
+function quitGame() { send("quit"); }
 
 
 //Pong
@@ -112,11 +112,11 @@ Game.prototype.update = function ()
     
     //control
     if (this.keys.isPressed(68)){
-        // this.p1.x = Math.min(this.width - this.p1.width, this.p1.x + 4);
+        this.p1.x = Math.min(this.width - this.p1.width, this.p1.x + 4);
         send("r");
     }
     else if (this.keys.isPressed(65)){
-        // this.p1.x = Math.max(0 , this.p1.x - 4);
+        this.p1.x = Math.max(0 , this.p1.x - 4);
         send("l");
     }
 
