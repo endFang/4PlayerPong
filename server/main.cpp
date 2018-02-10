@@ -33,6 +33,7 @@ struct Paddle {
 
 Paddle player1;
 webSocket server;
+bool gameOn;
 /* called when a client connects */
 void openHandler(int clientID) {
 	vector<int> clientIDs = server.getClientIDs();
@@ -64,24 +65,36 @@ void messageHandler(int clientID, string message){
     if (message == "init")
     {
         os << "init";
-        for (int i = 0; i < clientIDs.size(); i++){
+        for (int i = 0; i < clientIDs.size(); i++)
+		{
             server.wsSend(clientIDs[i], os.str());
         }
+        gameOn = true;
+    }
+
+    if (message == "quit")
+    {
+        os << "quit";
+        for (int i = 0; i < clientIDs.size(); i++)
+		{
+            server.wsSend(clientIDs[i], os.str());
+        }
+        gameOn = false;
     }
 
 	if (message == "l") {
 		player1.posX = fmin(0, player1.posX - player1.speed);
-        os << "l";
-        for (int i = 0; i < clientIDs.size(); i++){
-            server.wsSend(clientIDs[i], os.str());
-        }
+        // os << "l";
+        // for (int i = 0; i < clientIDs.size(); i++){
+        //     server.wsSend(clientIDs[i], os.str());
+        // }
 	}
 	if (message == "r") {
 		player1.posX = fmax(canvas.first-player1.posX, player1.posX + player1.speed);
-        os << "r";
-        for (int i = 0; i < clientIDs.size(); i++){
-            server.wsSend(clientIDs[i], os.str());
-        }
+        // os << "r";
+        // for (int i = 0; i < clientIDs.size(); i++){
+        //     server.wsSend(clientIDs[i], os.str());
+        // }
 	}
     
     
@@ -91,6 +104,8 @@ void messageHandler(int clientID, string message){
 /* called once per select() loop */
 void periodicHandler() {
 	static time_t next = time(NULL) + (float)0.3;
+    if (gameOn == true)
+    {
 	time_t current = time(NULL);
 	if (current >= next) {
 		ball.posX += ball.velocityX;
@@ -141,8 +156,7 @@ void periodicHandler() {
         }
         next = time(NULL) + (float)0.3;
 	// cout << os.str()<<std::endl;
-	}
-	
+	}	
 		/*
         ostringstream os;
 		//Deprecated ctime API in Windows 10
@@ -158,10 +172,13 @@ void periodicHandler() {
 		
         next = time(NULL) + (float)0.03;
     }*/
+    }
 }
 
 
 int main(int argc, char *argv[]){
+
+    gameOn = false;
 
 	canvas.first = 600;
 	canvas.second = 500;

@@ -1,4 +1,5 @@
 var Server;
+var gameOn = 0;
 
 function log( text ) {
     $log = $('#log');
@@ -39,9 +40,21 @@ function connect(){
 
     //Log any messages sent from server
     Server.bind('message', function( payload ) {
+        //initial gameState
         if (payload.trim() === "init")
         {
-            MainLoop();
+            gameOn = 1;
+            Loop();
+            log (payload)
+        }
+        else if (payload.trim() === "quit")
+        {
+            gameOn = 0;
+        }
+        //receiving a string
+        else
+        {
+            Loop(payload);
         }
     });
 
@@ -101,6 +114,19 @@ Game.prototype.draw = function()
     this.score1.draw(this.context);
 }
 
+Game.prototype.update = function (payload)
+{
+    var input = payload;
+    var s = payload.split("_");
+    this.ball.x = s[0];
+    this.ball.y = s[1];
+    this.p1.x = s[2];
+    this.p1.y = s[3];
+    this.p1.score = s[4];
+}
+
+
+/*
 Game.prototype.update = function ()
 {
     if (this.paused)
@@ -110,7 +136,7 @@ Game.prototype.update = function ()
 
     this.score1.value = this.p1.score;
     
-    //control
+    // control
     if (this.keys.isPressed(68)){
         this.p1.x = Math.min(this.width - this.p1.width, this.p1.x + 4);
         send("r");
@@ -159,6 +185,39 @@ Game.prototype.update = function ()
     }
 
 };
+*/
+
+Game.prototype.control = function ()
+{
+    if (this.keys.isPressed(68)){
+        send("r");
+    }
+    else if (this.keys.isPressed(65)){
+        send("l");
+    }
+}
+
+
+//ball
+function Ball() {
+    this.x = 0;
+    this.y = 0;
+    this.vx = 0;
+    this.vy = 0;
+    this.width = 10;
+    this.height = 10;
+};
+
+Ball.prototype.update = function ()
+{
+    this.x += this.vx;
+    this.y += this.vy;
+};
+
+Ball.prototype.draw = function (p)
+{
+    p.fillRect(this.x, this.y, this.width, this.height);
+};
 
 
 //paddle
@@ -197,28 +256,6 @@ KeyListener.prototype.addKeyPressListener = function (key)
             callback(e);
     })
 }
-//ball
-function Ball() {
-    this.x = 0;
-    this.y = 0;
-    this.vx = 0;
-    this.vy = 0;
-    this.width = 10;
-    this.height = 10;
-};
-
-Ball.prototype.update = function ()
-{
-    this.x += this.vx;
-    this.y += this.vy;
-};
-
-Ball.prototype.draw = function (p)
-{
-    p.fillRect(this.x, this.y, this.width, this.height);
-};
-
-
 
 //display
 function Display (x, y) {
@@ -235,10 +272,26 @@ Display.prototype.draw = function (p){
 
 //loop
 var game = new Game();
-function MainLoop() {
-    game.update();
-    game.draw();
-    setTimeout(MainLoop, 33.3333);
-}
+// function MainLoop() {
+//     game.update();
+//     game.draw();
+//     setTimeout(MainLoop, 33.3333);
+// }
 
-// MainLoop();
+// function controlLoop() 
+// { 
+//     if (gameOn == 1)
+//     {
+//         game.control(); 
+//         setTimeout(controlLoop, 33.3333);
+//     }
+// }
+
+function Loop(payload) {
+    if (gameOn == 1)
+    {
+        game.control();
+        game.update(payload);
+        game.draw();    
+    }
+}
