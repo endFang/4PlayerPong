@@ -1,3 +1,4 @@
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #ifdef __APPLE__
 #include <sys/socket.h>
 #include <netinet/in.h>

@@ -9,31 +9,86 @@
 #include <thread>
 #include <cmath>
 #define NUM_THREADS 4
+//#define PI 3.14159265
 using namespace std;
+
 int count;
-std::pair<int, int> canvas;
+std::pair<int, int> canvas;  //(x,y)
+
 struct Ball {
 	int width = 10;
 	int height = 10;
 	int posX;
 	int posY;
+	int speed;
+	int acceleration;
 	int velocityX = 0;
 	int velocityY = 0;
+	int maxAngle = 45;  //maximum angle of return when ball hits paddle
+
+	Ball() {
+
+	}
+
+	Ball(int positionX, int positionY, int initialSpeed, int angleDegrees) {
+		posX = positionX;
+		posY = positionY;
+		speed = initialSpeed;
+		calculateVelocity(angleDegrees);
+	}
+
+	void calculateVelocity(double angleDegrees) {
+		speed = 5;
+		//cout << "calculateVelocity\n";
+		cout << "angleDegrees " << angleDegrees << endl;
+		double radians = angleDegrees * 3.14159265 / 180;
+		cout << "radians " << radians << endl;
+		velocityX = speed * (int)sin(radians);
+		cout << "velocity: " << velocityX;
+		velocityY = -speed * (int)cos(radians);
+		cout << " " << velocityY << endl;
+	}
+
+	void paddleCollision(int paddleX, int paddleWidth) {
+		//speed += acceleration;
+		double paddleCenterX = paddleX + paddleWidth / 2;
+		//cout << "paddleCenter " << paddleCenterX << endl;
+		double disFromCenter = (posX + (width / 2)) - paddleCenterX; //ballCenterX - paddleCenterX
+		//cout << "disFromCenter " << disFromCenter << endl;
+		double ratio = disFromCenter / (paddleWidth / 2);
+		cout << "ratio " << ratio << endl;
+		calculateVelocity(maxAngle * ratio);
+
+		//if (disFromCenter < 0) //if the ball hit the left side of the paddle
+		//	velocityX = -velocityX;
+	}
 };
 
-Ball ball;
 struct Paddle {
 	int width = 100;
 	int height = 5;
 	int posX;
 	int posY;
-	int speed = 4;
+	int speed = 1; //4
 	int score = 0;
+
+	Paddle() {
+
+	}
+
+	Paddle(int Width, int Height, int positionX, int positionY) {
+		width = Width;
+		height = Height;
+		posX = positionX;
+		posY = positionY;
+	}
 };
 
+Ball ball;
 Paddle player1;
 webSocket server;
 bool gameOn;
+
 /* called when a client connects */
 void openHandler(int clientID) {
 	vector<int> clientIDs = server.getClientIDs();
@@ -137,6 +192,7 @@ void periodicHandler() {
 				if (x >= player1.posX && x + ball.width <= player1.posX + player1.width)
 				{
 					ball.velocityY = -ball.velocityY;
+					//ball.paddleCollision(player1.posX, player1.width);  //Will return ball with pong physics
 					player1.score++;
 				}
 			}
@@ -177,7 +233,7 @@ void periodicHandler() {
 
 
 int main(int argc, char *argv[]){
-
+	
     gameOn = false;
 
 	canvas.first = 600;
