@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "iterator": "cpp",
+        "system_error": "cpp",
+        "__locale": "cpp"
+    }
+}

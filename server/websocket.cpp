@@ -28,6 +28,9 @@
 
 using namespace std;
 
+#define MAX_USER 1;
+int userCount;
+
 void showAvailableIP(){
 
 #ifdef __linux__
@@ -668,6 +671,8 @@ void webSocket::setPeriodicHandler(nullCallback callback){
 void webSocket::startServer(int port){
     showAvailableIP();
 
+    userCount = 0;
+
     int yes = 1;
     char buf[4096];
     struct sockaddr_in serv_addr, cli_addr;
@@ -713,9 +718,10 @@ void webSocket::startServer(int port){
         if (select(fdmax+1, &read_fds, NULL, NULL, &timeout) > 0){
             for (int i = 0; i <= fdmax; i++){
                 if (FD_ISSET(i, &read_fds)){
-                    if (i == listenfd){
+                    if (i == listenfd && userCount <= 1){
                         socklen_t addrlen = sizeof(cli_addr);
                         int newfd = accept(listenfd, (struct sockaddr*)&cli_addr, &addrlen);
+                        ++userCount;
                         if (newfd != -1){
                             /* add new client */
                             wsAddClient(newfd, cli_addr.sin_addr);

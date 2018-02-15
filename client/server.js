@@ -44,17 +44,19 @@ function connect(){
         if (payload.trim() === "init")
         {
             gameOn = 1;
-            Loop();
-            log (payload)
+            Loop(payload);
         }
+        //quit game
         else if (payload.trim() === "quit")
         {
             gameOn = 0;
+            game.quit();
         }
-        //receiving a string
+        //receive new gameState
         else
         {
             Loop(payload);
+            // log (payload);
         }
     });
 
@@ -69,7 +71,7 @@ function disconnect(){
 
 
 function startGame() {
-    // send(document.getElementById("userid"));
+    send("id:"+document.getElementById("userid").value);
     send("init");
 }
 
@@ -102,9 +104,15 @@ function Game() {
 }
 
 
-Game.prototype.score = function(p) {
-    p.score++;
+// Game.prototype.score = function(p) {
+//     p.score++;
+// }
+
+Game.prototype.quit = function()
+{
+    this.context.clearRect(0, 0, this.width, this.height);
 }
+
 
 Game.prototype.draw = function()
 {
@@ -116,13 +124,13 @@ Game.prototype.draw = function()
 
 Game.prototype.update = function (payload)
 {
-    var input = payload;
-    var s = payload.split("_");
-    this.ball.x = s[0];
-    this.ball.y = s[1];
-    this.p1.x = s[2];
-    this.p1.y = s[3];
-    this.p1.score = s[4];
+        var input = payload;
+        var s = payload.split("_");
+        this.ball.x = s[0];
+        this.ball.y = s[1];
+        this.p1.x = s[2];
+        this.p1.y = s[3];
+        this.score1.value = Number(s[4]);
 }
 
 
@@ -226,7 +234,7 @@ function Paddle (x,y,w,h) {
     this.y = y;
     this.width = w;
     this.height = h;
-    this.score = 0;
+    // this.score = 0;
 }
 
 Paddle.prototype.draw = function (p)
@@ -292,6 +300,6 @@ function Loop(payload) {
     {
         game.control();
         game.update(payload);
-        game.draw();    
+        game.draw();
     }
 }

@@ -9,6 +9,11 @@
 #include <thread>
 #include <cmath>
 #define NUM_THREADS 4
+
+#define INTERVAL_MS 10
+int interval_clocks = CLOCKS_PER_SEC * INTERVAL_MS / 50000;
+
+
 using namespace std;
 int count;
 std::pair<int, int> canvas;
@@ -23,6 +28,7 @@ struct Ball {
 
 Ball ball;
 struct Paddle {
+	string id;
 	int width = 100;
 	int height = 5;
 	int posX;
@@ -72,7 +78,7 @@ void messageHandler(int clientID, string message){
         gameOn = true;
     }
 
-    if (message == "quit")
+    else if (message == "quit")
     {
         os << "quit";
         for (int i = 0; i < clientIDs.size(); i++)
@@ -82,19 +88,16 @@ void messageHandler(int clientID, string message){
         gameOn = false;
     }
 
-	if (message == "l") {
-		player1.posX = fmin(0, player1.posX - player1.speed);
-        // os << "l";
-        // for (int i = 0; i < clientIDs.size(); i++){
-        //     server.wsSend(clientIDs[i], os.str());
-        // }
+	else if (message.find("id:") == 0)
+	{
+		player1.id = message;
 	}
-	if (message == "r") {
-		player1.posX = fmax(canvas.first-player1.posX, player1.posX + player1.speed);
-        // os << "r";
-        // for (int i = 0; i < clientIDs.size(); i++){
-        //     server.wsSend(clientIDs[i], os.str());
-        // }
+
+	else if (message == "l") {
+		player1.posX = fmax(0, player1.posX - player1.speed);
+	}
+	else if (message == "r") {
+		player1.posX = fmin(canvas.first-player1.width, player1.posX + player1.speed);
 	}
     
     
@@ -103,10 +106,10 @@ void messageHandler(int clientID, string message){
 
 /* called once per select() loop */
 void periodicHandler() {
-	static time_t next = time(NULL) + (float)0.3;
+	static time_t next = clock() + interval_clocks;
     if (gameOn == true)
     {
-	time_t current = time(NULL);
+	clock_t current = clock();
 	if (current >= next) {
 		ball.posX += ball.velocityX;
 		ball.posY += ball.velocityY;
@@ -154,7 +157,7 @@ void periodicHandler() {
         for (int i = 0; i < clientIDs.size(); i++){
             server.wsSend(clientIDs[i], os.str());
         }
-        next = time(NULL) + (float)0.3;
+        next = clock() + interval_clocks;
 	// cout << os.str()<<std::endl;
 	}	
 		/*
