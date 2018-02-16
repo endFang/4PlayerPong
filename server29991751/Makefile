@@ -2,7 +2,7 @@ CC = g++
 CFLAGS = -c
 SOURCES = main.cpp websocket.cpp sha1.cpp base64.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
-EXECUTABLE = chatroom
+EXECUTABLE = server
 
 all: $(SOURCES) $(EXECUTABLE)
 	

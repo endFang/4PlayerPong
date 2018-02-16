@@ -26,6 +26,7 @@ function connect(){
         }
     });
 
+
     //Let the user know we're connected
     Server.bind('open', function() {
         document.getElementById("cntBtn").disabled = true;
@@ -91,29 +92,22 @@ function Game() {
 
     //initialize paddles
     this.p1 = new Paddle(this.width/2, 0, 100, 5);
-    this.p1.y = this.height - this.p1.height*5;
+    // this.p1.y = this.height - this.p1.height*5;
     this.score1 = new Display(this.width/4, 480)
 
 
     //initailzie the ball
     this.ball = new Ball();
-    this.ball.x = this.width/2;
-    this.ball.y = this.height/2;
-    this.ball.vy = 5;
-    this.ball.vx = 5;
+    // this.ball.x = this.width/2;
+    // this.ball.y = this.height/2;
+    // this.ball.vy = 5;
+    // this.ball.vx = 5;
 }
 
 
 // Game.prototype.score = function(p) {
 //     p.score++;
 // }
-
-Game.prototype.quit = function()
-{
-    this.context.clearRect(0, 0, this.width, this.height);
-}
-
-
 Game.prototype.draw = function()
 {
     this.context.clearRect(0, 0, this.width, this.height);
@@ -134,6 +128,110 @@ Game.prototype.update = function (payload)
 }
 
 
+Game.prototype.control = function ()
+{
+    if (this.keys.isPressed(68)){
+        send("r");
+    }
+    else if (this.keys.isPressed(65)){
+        send("l");
+    }
+}
+
+Game.prototype.quit = function()
+{
+    this.context.clearRect(0, 0, this.width, this.height);
+}
+
+
+//ball
+function Ball() {
+    this.x = 0;
+    this.y = 0;
+    this.vx = 0;
+    this.vy = 0;
+    this.width = 10;
+    this.height = 10;
+};
+
+// Ball.prototype.update = function ()
+// {
+//     this.x += this.vx;
+//     this.y += this.vy;
+// };
+
+Ball.prototype.draw = function (p)
+{
+    p.fillRect(this.x, this.y, this.width, this.height);
+};
+
+
+//paddle
+function Paddle (x,y,w,h) {
+    this.x = x;
+    this.y = y;
+    this.width = w;
+    this.height = h;
+    // this.score = 0;
+}
+
+Paddle.prototype.draw = function (p)
+{
+    p.fillRect(this.x, this.y, this.width, this.height);
+}
+
+//input
+//bind(): tell the callback that "this" actually points to our KeyListener isntance(this3)
+function KeyListener () {
+    this.pressedKeys = [];
+    this.keydown = function (e) { this.pressedKeys[e.keyCode] = true;};
+    this.keyup = function(e){this.pressedKeys[e.keyCode] = false;};
+    document.addEventListener("keydown", this.keydown.bind(this));
+    document.addEventListener("keyup", this.keyup.bind(this));
+}
+
+KeyListener.prototype.isPressed = function (key)
+{
+    return this.pressedKeys[key] ? true : false;
+}
+
+KeyListener.prototype.addKeyPressListener = function (key)
+{
+    docuemtn.addKeyPressListener("keypress", function(e){
+        if (e.keyCode == keyCode)
+            callback(e);
+    })
+}
+
+//display
+function Display (x, y) {
+    this.x = x;
+    this.y = y;
+    this.value = 0;
+}
+
+Display.prototype.draw = function (p){
+    p.font = "20px Georgia";
+    p.fillText(this.value, this.x, this.y);
+    p.fillText(document.getElementById("userid").value, this.x, this.y+15);
+}
+
+//loop
+var game = new Game();
+
+function Loop(payload) {
+    if (gameOn == 1)
+    {
+        game.control();
+        game.update(payload);
+        game.draw();
+    }
+}
+
+
+
+
+//pong legacy code
 /*
 Game.prototype.update = function ()
 {
@@ -194,112 +292,3 @@ Game.prototype.update = function ()
 
 };
 */
-
-Game.prototype.control = function ()
-{
-    if (this.keys.isPressed(68)){
-        send("r");
-    }
-    else if (this.keys.isPressed(65)){
-        send("l");
-    }
-}
-
-
-//ball
-function Ball() {
-    this.x = 0;
-    this.y = 0;
-    this.vx = 0;
-    this.vy = 0;
-    this.width = 10;
-    this.height = 10;
-};
-
-Ball.prototype.update = function ()
-{
-    this.x += this.vx;
-    this.y += this.vy;
-};
-
-Ball.prototype.draw = function (p)
-{
-    p.fillRect(this.x, this.y, this.width, this.height);
-};
-
-
-//paddle
-function Paddle (x,y,w,h) {
-    this.x = x;
-    this.y = y;
-    this.width = w;
-    this.height = h;
-    // this.score = 0;
-}
-
-Paddle.prototype.draw = function (p)
-{
-    p.fillRect(this.x, this.y, this.width, this.height);
-}
-
-//input
-//bind(): tell the callback that "this" actually points to our KeyListener isntance(this3)
-function KeyListener () {
-    this.pressedKeys = [];
-    this.keydown = function (e) { this.pressedKeys[e.keyCode] = true;};
-    this.keyup = function(e){this.pressedKeys[e.keyCode] = false;};
-    document.addEventListener("keydown", this.keydown.bind(this));
-    document.addEventListener("keyup", this.keyup.bind(this));
-}
-
-KeyListener.prototype.isPressed = function (key)
-{
-    return this.pressedKeys[key] ? true : false;
-}
-
-KeyListener.prototype.addKeyPressListener = function (key)
-{
-    docuemtn.addKeyPressListener("keypress", function(e){
-        if (e.keyCode == keyCode)
-            callback(e);
-    })
-}
-
-//display
-function Display (x, y) {
-    this.x = x;
-    this.y = y;
-    this.value = 0;
-}
-
-Display.prototype.draw = function (p){
-    p.font = "20px Georgia";
-    p.fillText(this.value, this.x, this.y);
-    p.fillText(document.getElementById("userid").value, this.x, this.y+15);
-}
-
-//loop
-var game = new Game();
-// function MainLoop() {
-//     game.update();
-//     game.draw();
-//     setTimeout(MainLoop, 33.3333);
-// }
-
-// function controlLoop() 
-// { 
-//     if (gameOn == 1)
-//     {
-//         game.control(); 
-//         setTimeout(controlLoop, 33.3333);
-//     }
-// }
-
-function Loop(payload) {
-    if (gameOn == 1)
-    {
-        game.control();
-        game.update(payload);
-        game.draw();
-    }
-}

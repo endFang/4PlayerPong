@@ -10,8 +10,8 @@
 #include <cmath>
 #define NUM_THREADS 4
 
-#define INTERVAL_MS 10
-int interval_clocks = CLOCKS_PER_SEC * INTERVAL_MS / 50000;
+#define INTERVAL_MS 0.1
+int interval_clocks = CLOCKS_PER_SEC * INTERVAL_MS / 1000;
 
 //#define PI 3.14159265
 
@@ -75,7 +75,7 @@ struct Paddle {
 	int height = 5;
 	int posX;
 	int posY;
-	int speed = 1; //4
+	int speed = 5; //4
 	int score = 0;
 
 	Paddle() {
@@ -164,73 +164,58 @@ void periodicHandler() {
 	static time_t next = clock() + interval_clocks;
     if (gameOn == true)
     {
-	clock_t current = clock();
-	if (current >= next) {
-		ball.posX += ball.velocityX;
-		ball.posY += ball.velocityY;
-		if ((ball.velocityX < 0 && ball.posX < 0) ||
-			(ball.velocityX > 0 && ball.posX + ball.width > canvas.first)) {
-			ball.velocityX = -ball.velocityX;
-		}
-
-		//bottom and top
-		if (ball.velocityY < 0)
-		{
-			//top
-			if (ball.posY < 0)
-				ball.velocityY = -ball.velocityY;
-		}
-		else
-		{
-			//bottom
-			if (player1.posY <= ball.posY + ball.height)
-				//  && this.p1.y > this.ball.y - this.ball.vy + this.ball.height)
-			{
-				//collision distance
-				int d = ball.posY + ball.height - player1.posY;
-				//time
-				int t = d / ball.velocityY;
-				//x translate
-				int x = ball.velocityX*t + (ball.posX - ball.velocityX);
-				if (x >= player1.posX && x + ball.width <= player1.posX + player1.width)
-				{
-					ball.velocityY = -ball.velocityY;
-					//ball.paddleCollision(player1.posX, player1.width);  //Will return ball with pong physics
-					player1.score++;
-				}
+		clock_t current = clock();
+		if (current >= next) {
+			ball.posX += ball.velocityX;
+			ball.posY += ball.velocityY;
+			if ((ball.velocityX < 0 && ball.posX < 0) ||
+				(ball.velocityX > 0 && ball.posX + ball.width > canvas.first)) {
+				ball.velocityX = -ball.velocityX;
 			}
-			if (ball.posY > canvas.second)
-				ball.velocityY = -ball.velocityY;
-		}
 
-		ostringstream os;
-		os << setfill('0') << setw(3) << ball.posX << "_";
-		os << setfill('0') << setw(3) << ball.posY << "_";
-		os << setfill('0') << setw(3) << player1.posX<< "_";
-		os << setfill('0') << setw(3) << player1.posY<< "_";
-		os << setfill('0') << setw(2) << player1.score;
-        vector<int> clientIDs = server.getClientIDs();
-        for (int i = 0; i < clientIDs.size(); i++){
-            server.wsSend(clientIDs[i], os.str());
-        }
-        next = clock() + interval_clocks;
-	// cout << os.str()<<std::endl;
-	}	
-		/*
-        ostringstream os;
-		//Deprecated ctime API in Windows 10
-		char timecstring[26];
-		ctime_s(timecstring, sizeof(timecstring), &current);
-		string timestring(timecstring);
-        timestring = timestring.substr(0, timestring.size() - 1);
-        os << timestring;
+			//bottom and top
+			if (ball.velocityY < 0)
+			{
+				//top
+				if (ball.posY < 0)
+					ball.velocityY = -ball.velocityY;
+			}
+			else
+			{
+				//bottom
+				if (player1.posY <= ball.posY + ball.height)
+					//  && this.p1.y > this.ball.y - this.ball.vy + this.ball.height)
+				{
+					//collision distance
+					int d = ball.posY + ball.height - player1.posY;
+					//time
+					int t = d / ball.velocityY;
+					//x translate
+					int x = ball.velocityX*t + (ball.posX - ball.velocityX);
+					if (x >= player1.posX && x + ball.width <= player1.posX + player1.width)
+					{
+						ball.velocityY = -ball.velocityY;
+						//ball.paddleCollision(player1.posX, player1.width);  //Will return ball with pong physics
+						player1.score++;
+					}
+				}
+				if (ball.posY > canvas.second)
+					ball.velocityY = -ball.velocityY;
+			}
 
-        vector<int> clientIDs = server.getClientIDs();
-        for (int i = 0; i < clientIDs.size(); i++)
-            server.wsSend(clientIDs[i], os.str());
-		
-        next = time(NULL) + (float)0.03;
-    }*/
+			ostringstream os;
+			os << setfill('0') << setw(3) << ball.posX << "_";
+			os << setfill('0') << setw(3) << ball.posY << "_";
+			os << setfill('0') << setw(3) << player1.posX<< "_";
+			os << setfill('0') << setw(3) << player1.posY<< "_";
+			os << setfill('0') << setw(2) << player1.score;
+			vector<int> clientIDs = server.getClientIDs();
+			for (int i = 0; i < clientIDs.size(); i++){
+				server.wsSend(clientIDs[i], os.str());
+			}
+			next = clock() + interval_clocks;
+			// cout << os.str()<<std::endl;
+		}	
     }
 }
 
