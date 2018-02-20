@@ -29,12 +29,12 @@
 
 using namespace std;
 
-#define MAX_USER 1;
+#define MAX_USER 4;
 int userCount;
 
 void showAvailableIP(){
 
-#ifdef __linux__
+#ifdef __APPLE__
 
     char name[INET_ADDRSTRLEN];
     struct ifaddrs *iflist;
@@ -719,7 +719,7 @@ void webSocket::startServer(int port){
         if (select(fdmax+1, &read_fds, NULL, NULL, &timeout) > 0){
             for (int i = 0; i <= fdmax; i++){
                 if (FD_ISSET(i, &read_fds)){
-                    if (i == listenfd && userCount <= 1){
+                    if (i == listenfd && userCount <= 4){
                         socklen_t addrlen = sizeof(cli_addr);
                         int newfd = accept(listenfd, (struct sockaddr*)&cli_addr, &addrlen);
                         ++userCount;

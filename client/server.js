@@ -1,3 +1,7 @@
+//====================
+//       Server
+//====================
+
 var Server;
 var gameOn = 0;
 
@@ -25,7 +29,6 @@ function connect(){
             $(this).val('');
         }
     });
-
 
     //Let the user know we're connected
     Server.bind('open', function() {
@@ -79,9 +82,68 @@ function startGame() {
 function quitGame() { send("quit"); }
 
 
-//Pong
-function Game() {
 
+
+
+//====================
+//       Pong
+//====================
+
+//====================
+//       Ball
+//====================
+function Ball() {
+    this.x = 0;
+    this.y = 0;
+    this.width = 10;
+    this.height = 10;
+};
+
+
+Ball.prototype.draw = function (p)
+{
+    p.fillRect(this.x, this.y, this.width, this.height);
+};
+
+
+//====================
+//       Paddle
+//====================
+function Paddle (x,y,w,h) {
+    this.x = x;
+    this.y = y;
+    this.width = w;
+    this.height = h;
+    // this.score = 0;
+}
+
+Paddle.prototype.draw = function (p)
+{
+    p.fillRect(this.x, this.y, this.width, this.height);
+}
+
+
+//====================
+//       Display for ID & Score
+//====================
+function Display (x, y) {
+    this.x = x;
+    this.y = y;
+    this.value = 0;
+}
+
+Display.prototype.draw = function (p){
+    p.font = "20px Georgia";
+    p.fillText(this.value, this.x, this.y);
+    p.fillText(document.getElementById("userid").value, this.x, this.y+15);
+}
+
+
+
+//====================
+//       Game
+//====================
+function Game() {
     //initialize gametable
     var canvas = document.getElementById("game");
     this.width = canvas.width;
@@ -91,29 +153,41 @@ function Game() {
     this.keys = new KeyListener();
 
     //initialize paddles
-    this.p1 = new Paddle(this.width/2, 0, 100, 5);
-    // this.p1.y = this.height - this.p1.height*5;
+    this.p1 = new Paddle(this.width/2, 480, 100, 5);
     this.score1 = new Display(this.width/4, 480)
+
+    this.p2 = new Paddle(this.width/2, 20, 100, 5);
+    this.score2 = new Display(this.width*3/4, 20)
+
+    this.p3 = new Paddle(20, this.height/2, 5, 100);
+    this.score3 = new Display(20, this.height/4)
+
+    this.p4 = new Paddle(580, this.height/2, 5, 100);
+    this.score4 = new Display(550, this.height*3/4)
 
 
     //initailzie the ball
     this.ball = new Ball();
-    // this.ball.x = this.width/2;
-    // this.ball.y = this.height/2;
-    // this.ball.vy = 5;
-    // this.ball.vx = 5;
+
 }
 
 
-// Game.prototype.score = function(p) {
-//     p.score++;
-// }
 Game.prototype.draw = function()
 {
     this.context.clearRect(0, 0, this.width, this.height);
     this.ball.draw(this.context);
+    
     this.p1.draw(this.context);
     this.score1.draw(this.context);
+    
+    this.p2.draw(this.context);
+    this.score2.draw(this.context);
+    
+    this.p3.draw(this.context);
+    this.score3.draw(this.context);
+    
+    this.p4.draw(this.context);
+    this.score4.draw(this.context);
 }
 
 Game.prototype.update = function (payload)
@@ -144,41 +218,21 @@ Game.prototype.quit = function()
 }
 
 
-//ball
-function Ball() {
-    this.x = 0;
-    this.y = 0;
-    this.vx = 0;
-    this.vy = 0;
-    this.width = 10;
-    this.height = 10;
-};
+var game = new Game();
 
-// Ball.prototype.update = function ()
-// {
-//     this.x += this.vx;
-//     this.y += this.vy;
-// };
-
-Ball.prototype.draw = function (p)
-{
-    p.fillRect(this.x, this.y, this.width, this.height);
-};
-
-
-//paddle
-function Paddle (x,y,w,h) {
-    this.x = x;
-    this.y = y;
-    this.width = w;
-    this.height = h;
-    // this.score = 0;
+function Loop(payload) {
+    if (gameOn == 1)
+    {
+        game.control();
+        game.update(payload);
+        game.draw();
+    }
 }
 
-Paddle.prototype.draw = function (p)
-{
-    p.fillRect(this.x, this.y, this.width, this.height);
-}
+
+
+
+
 
 //input
 //bind(): tell the callback that "this" actually points to our KeyListener isntance(this3)
@@ -203,30 +257,9 @@ KeyListener.prototype.addKeyPressListener = function (key)
     })
 }
 
-//display
-function Display (x, y) {
-    this.x = x;
-    this.y = y;
-    this.value = 0;
-}
 
-Display.prototype.draw = function (p){
-    p.font = "20px Georgia";
-    p.fillText(this.value, this.x, this.y);
-    p.fillText(document.getElementById("userid").value, this.x, this.y+15);
-}
 
-//loop
-var game = new Game();
 
-function Loop(payload) {
-    if (gameOn == 1)
-    {
-        game.control();
-        game.update(payload);
-        game.draw();
-    }
-}
 
 
 
@@ -291,4 +324,12 @@ Game.prototype.update = function ()
     }
 
 };
+
+
+// Ball.prototype.update = function ()
+// {
+//     this.x += this.vx;
+//     this.y += this.vy;
+// };
+
 */

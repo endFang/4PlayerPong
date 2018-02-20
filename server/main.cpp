@@ -21,66 +21,30 @@ int count;
 std::pair<int, int> canvas;  //(x,y)
 
 struct Ball {
-	int width = 10;
-	int height = 10;
+	int width;
+	int height;
 	int posX;
 	int posY;
-	int speed;
-	int acceleration;
-	int velocityX = 0;
-	int velocityY = 0;
-	int maxAngle = 45;  //maximum angle of return when ball hits paddle
+	int velocityX;
+	int velocityY;
 
-	Ball() {
-
-	}
-
-	Ball(int positionX, int positionY, int initialSpeed, int angleDegrees) {
-		posX = positionX;
-		posY = positionY;
-		speed = initialSpeed;
-		calculateVelocity(angleDegrees);
-	}
-
-	void calculateVelocity(double angleDegrees) {
-		speed = 5;
-		//cout << "calculateVelocity\n";
-		cout << "angleDegrees " << angleDegrees << endl;
-		double radians = angleDegrees * 3.14159265 / 180;
-		cout << "radians " << radians << endl;
-		velocityX = speed * (int)sin(radians);
-		cout << "velocity: " << velocityX;
-		velocityY = -speed * (int)cos(radians);
-		cout << " " << velocityY << endl;
-	}
-
-	void paddleCollision(int paddleX, int paddleWidth) {
-		//speed += acceleration;
-		double paddleCenterX = paddleX + paddleWidth / 2;
-		//cout << "paddleCenter " << paddleCenterX << endl;
-		double disFromCenter = (posX + (width / 2)) - paddleCenterX; //ballCenterX - paddleCenterX
-		//cout << "disFromCenter " << disFromCenter << endl;
-		double ratio = disFromCenter / (paddleWidth / 2);
-		cout << "ratio " << ratio << endl;
-		calculateVelocity(maxAngle * ratio);
-
-		//if (disFromCenter < 0) //if the ball hit the left side of the paddle
-		//	velocityX = -velocityX;
-	}
+	Ball()
+		:width(10), height(10), velocityX(5), velocityY(5)
+	{}
 };
 
 struct Paddle {
 	string id;
-	int width = 100;
-	int height = 5;
+	int width;
+	int height;
 	int posX;
 	int posY;
-	int speed = 5; //4
-	int score = 0;
+	int speed;
+	int score;
 
-	Paddle() {
-
-	}
+	Paddle()
+		:speed(4), score(0)
+	{}
 
 	Paddle(int Width, int Height, int positionX, int positionY) {
 		width = Width;
@@ -92,6 +56,10 @@ struct Paddle {
 
 Ball ball;
 Paddle player1;
+Paddle player2;
+Paddle player3;
+Paddle player4;
+
 webSocket server;
 bool gameOn;
 
@@ -108,7 +76,6 @@ void openHandler(int clientID) {
 /* called when a client disconnects */
 void closeHandler(int clientID){
     ostringstream os;
-    //os << "Stranger " << clientID << " has leaved.";
 
     vector<int> clientIDs = server.getClientIDs();
     for (int i = 0; i < clientIDs.size(); i++){
@@ -120,7 +87,6 @@ void closeHandler(int clientID){
 /* called when a client sends a message to the server */
 void messageHandler(int clientID, string message){
     ostringstream os;
-    //os << "Stranger " << clientID << " says: " << message;
 
     vector<int> clientIDs = server.getClientIDs();
     if (message == "init")
@@ -184,7 +150,7 @@ void periodicHandler() {
 			{
 				//bottom
 				if (player1.posY <= ball.posY + ball.height)
-					//  && this.p1.y > this.ball.y - this.ball.vy + this.ball.height)
+
 				{
 					//collision distance
 					int d = ball.posY + ball.height - player1.posY;
@@ -195,7 +161,6 @@ void periodicHandler() {
 					if (x >= player1.posX && x + ball.width <= player1.posX + player1.width)
 					{
 						ball.velocityY = -ball.velocityY;
-						//ball.paddleCollision(player1.posX, player1.width);  //Will return ball with pong physics
 						player1.score++;
 					}
 				}
@@ -224,16 +189,26 @@ int main(int argc, char *argv[]){
 	
     gameOn = false;
 
-	canvas.first = 600;
-	canvas.second = 500;
+	canvas.first = 600; //width
+	canvas.second = 500; //height
 	//Ball ball;
 	ball.posX = canvas.first / 2;
 	ball.posY = canvas.second / 2;
 	ball.velocityX = 5;
 	ball.velocityY = 5;
-	//Paddle player1;
+
+	//Paddle players;
 	player1.posX = canvas.first / 2;
-	player1.posY = canvas.second- 25;
+	player1.posY = 480;
+
+	player2.posX = canvas.first / 2;
+	player2.posY = 20;
+
+	player3.posX = 20;
+	player3.posY = canvas.second/2;
+
+	player4.posX = 580;
+	player4.posY = canvas.second/2;
 
 
 	//port1 = 1000;
