@@ -1,0 +1,40 @@
+﻿  websocket.cpp
+c:\users\gregg\documents\my_games\4playerpong\server\websocket.cpp(90): warning C4477: 'printf' : format string '%s' requires an argument of type 'char *', but variadic argument 1 has type 'LPVOID'
+c:\users\gregg\documents\my_games\4playerpong\server\websocket.cpp(113): warning C4018: '<': signed/unsigned mismatch
+c:\users\gregg\documents\my_games\4playerpong\server\websocket.cpp(127): warning C4018: '<': signed/unsigned mismatch
+c:\users\gregg\documents\my_games\4playerpong\server\websocket.cpp(149): warning C4018: '>=': signed/unsigned mismatch
+c:\users\gregg\documents\my_games\4playerpong\server\websocket.cpp(162): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+c:\users\gregg\documents\my_games\4playerpong\server\websocket.cpp(186): warning C4267: '=': conversion from 'size_t' to 'char', possible loss of data
+c:\users\gregg\documents\my_games\4playerpong\server\websocket.cpp(195): warning C4267: '=': conversion from 'size_t' to 'char', possible loss of data
+c:\users\gregg\documents\my_games\4playerpong\server\websocket.cpp(196): warning C4267: '=': conversion from 'size_t' to 'char', possible loss of data
+c:\users\gregg\documents\my_games\4playerpong\server\websocket.cpp(210): warning C4267: '=': conversion from 'size_t' to 'char', possible loss of data
+c:\users\gregg\documents\my_games\4playerpong\server\websocket.cpp(211): warning C4267: '=': conversion from 'size_t' to 'char', possible loss of data
+c:\users\gregg\documents\my_games\4playerpong\server\websocket.cpp(212): warning C4267: '=': conversion from 'size_t' to 'char', possible loss of data
+c:\users\gregg\documents\my_games\4playerpong\server\websocket.cpp(404): warning C4018: '<': signed/unsigned mismatch
+c:\users\gregg\documents\my_games\4playerpong\server\websocket.cpp(603): warning C4018: '>=': signed/unsigned mismatch
+c:\users\gregg\documents\my_games\4playerpong\server\websocket.cpp(630): warning C4018: '<': signed/unsigned mismatch
+c:\users\gregg\documents\my_games\4playerpong\server\websocket.cpp(644): warning C4018: '>=': signed/unsigned mismatch
+c:\users\gregg\documents\my_games\4playerpong\server\websocket.cpp(764): warning C4018: '<': signed/unsigned mismatch
+  sha1.cpp
+c:\users\gregg\documents\my_games\4playerpong\server\sha1.cpp(226): warning C4267: '+=': conversion from 'size_t' to 'unsigned char', possible loss of data
+c:\users\gregg\documents\my_games\4playerpong\server\sha1.cpp(233): warning C4267: '+=': conversion from 'size_t' to 'unsigned char', possible loss of data
+c:\users\gregg\documents\my_games\4playerpong\server\sha1.cpp(264): warning C4267: '+=': conversion from 'size_t' to 'unsigned char', possible loss of data
+  main.cpp
+c:\users\gregg\documents\my_games\4playerpong\server\main.cpp(89): warning C4018: '<': signed/unsigned mismatch
+c:\users\gregg\documents\my_games\4playerpong\server\main.cpp(100): warning C4018: '<': signed/unsigned mismatch
+c:\users\gregg\documents\my_games\4playerpong\server\main.cpp(131): warning C4018: '<': signed/unsigned mismatch
+c:\users\gregg\documents\my_games\4playerpong\server\main.cpp(141): warning C4018: '<': signed/unsigned mismatch
+c:\users\gregg\documents\my_games\4playerpong\server\main.cpp(157): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\users\gregg\documents\my_games\4playerpong\server\main.cpp(160): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\users\gregg\documents\my_games\4playerpong\server\main.cpp(163): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\users\gregg\documents\my_games\4playerpong\server\main.cpp(166): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\users\gregg\documents\my_games\4playerpong\server\main.cpp(175): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\users\gregg\documents\my_games\4playerpong\server\main.cpp(178): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\users\gregg\documents\my_games\4playerpong\server\main.cpp(181): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\users\gregg\documents\my_games\4playerpong\server\main.cpp(184): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\users\gregg\documents\my_games\4playerpong\server\main.cpp(300): warning C4018: '<': signed/unsigned mismatch
+  base64.cpp
+c:\users\gregg\documents\my_games\4playerpong\server\base64.cpp(96): warning C4267: '=': conversion from 'size_t' to 'unsigned char', possible loss of data
+c:\users\gregg\documents\my_games\4playerpong\server\base64.cpp(113): warning C4267: '=': conversion from 'size_t' to 'unsigned char', possible loss of data
+  Generating Code...
+  server.vcxproj -> C:\Users\Gregg\Documents\my_games\4PlayerPong\server\Debug\server.exe
