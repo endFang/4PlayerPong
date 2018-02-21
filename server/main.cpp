@@ -30,9 +30,9 @@ struct Ball {
 	int posY;
 	int velocityX;
 	int velocityY;
-
+	int lastHit;
 	Ball()
-		:width(10), height(10), velocityX(5), velocityY(5)
+		:width(10), height(10), velocityX(5), velocityY(5), lastHit(0)
 	{}
 };
 
@@ -63,6 +63,24 @@ Paddle player4(paddley, paddlex, canvas.first-from_side, canvas.second / 2);
 
 webSocket server;
 bool gameOn;
+void hitWall() {
+	if (ball.lastHit == 1) {
+		player1.score++;
+		ball.lastHit = 0;
+	}
+	else if (ball.lastHit == 2) {
+		player2.score++;
+		ball.lastHit = 0;
+	}
+	else if (ball.lastHit == 3) {
+		player3.score++;
+		ball.lastHit = 0;
+	}
+	else if (ball.lastHit == 4) {
+		player4.score++;
+		ball.lastHit = 0;
+	}
+}
 
 /* called when a client connects */
 void openHandler(int clientID) {
@@ -172,25 +190,67 @@ void messageHandler(int clientID, string message){
 
 /* called once per select() loop */
 void periodicHandler() {
-	
-    if (gameOn == true)
-    {
-		static time_t next = clock() + interval_clocks;
+	static time_t next = clock() + interval_clocks;
+	if (gameOn == true)
+	{
 		clock_t current = clock();
 		if (current >= next) {
 			ball.posX += ball.velocityX;
 			ball.posY += ball.velocityY;
-			if ((ball.velocityX < 0 && ball.posX < 0) ||
-				(ball.velocityX > 0 && ball.posX + ball.width > canvas.first)) {
-				ball.velocityX = -ball.velocityX;
+
+			//left
+			if (ball.velocityX < 0) {
+
+				if (player3.posX + player3.width >= ball.posX)
+				{
+					if (ball.posY >= player3.posY && ball.posY + ball.height <= player3.posY + player3.height)
+					{
+						ball.velocityX = -ball.velocityX;
+						ball.lastHit = 3;
+					}
+				}
+
+				if (ball.posX < 0) {
+					ball.velocityX = -ball.velocityX;
+					hitWall();
+				}
+			}
+
+			//right
+			else {//((ball.velocityX > 0 && ball.posX + ball.width > canvas.first)) {
+				if (player4.posX <= ball.posX + ball.width)
+				{
+					//cout << "ball past p4\n";
+					if (ball.posY >= player4.posY && ball.posY + ball.height <= player4.posY + player4.height)
+					{
+						//cout << "ball collision\n";
+						ball.velocityX = -ball.velocityX;
+						ball.lastHit = 4;
+					}
+				}
+
+				if (ball.posX + ball.width > canvas.first) {
+					ball.velocityX = -ball.velocityX;
+					hitWall();
+				}
 			}
 
 			//bottom and top
 			if (ball.velocityY < 0)
 			{
 				//top
-				if (ball.posY < 0)
+				if (player2.posY + player2.height >= ball.posY)
+				{
+					if (ball.posX >= player2.posX && ball.posX + ball.width <= player2.posX + player1.width)
+					{
+						ball.velocityY = -ball.velocityY;
+						ball.lastHit = 2;
+					}
+				}
+				if (ball.posY < 0) {
 					ball.velocityY = -ball.velocityY;
+					hitWall();
+				}
 			}
 			else
 			{
@@ -198,56 +258,52 @@ void periodicHandler() {
 				if (player1.posY <= ball.posY + ball.height)
 
 				{
-					//collision distance
-					int d = ball.posY + ball.height - player1.posY;
-					//time
-					int t = d / ball.velocityY;
-					//x translate
-					int x = ball.velocityX*t + (ball.posX - ball.velocityX);
-					if (x >= player1.posX && x + ball.width <= player1.posX + player1.width)
+					if (ball.posX >= player1.posX && ball.posX + ball.width <= player1.posX + player1.width)
 					{
 						ball.velocityY = -ball.velocityY;
-						player1.score++;
+						ball.lastHit = 1;
 					}
 				}
-				if (ball.posY > canvas.second)
+				if (ball.posY > canvas.second) {
 					ball.velocityY = -ball.velocityY;
+					hitWall();
+				}
 			}
 
 			ostringstream os;
 			os << setfill('0') << setw(3) << ball.posX << "_";
 			os << setfill('0') << setw(3) << ball.posY << "_";
-			os << setfill('0') << setw(3) << player1.posX<< "_";
-			os << setfill('0') << setw(3) << player1.posY<< "_";
-			os << setfill('0') << setw(2) << player1.score<<"_";
+			os << setfill('0') << setw(3) << player1.posX << "_";
+			os << setfill('0') << setw(3) << player1.posY << "_";
+			os << setfill('0') << setw(2) << player1.score << "_";
 
-			os << setfill('0') << setw(3) << player2.posX<< "_";
-			os << setfill('0') << setw(3) << player2.posY<< "_";
-			os << setfill('0') << setw(2) << player2.score<<"_";
+			os << setfill('0') << setw(3) << player2.posX << "_";
+			os << setfill('0') << setw(3) << player2.posY << "_";
+			os << setfill('0') << setw(2) << player2.score << "_";
 
-			os << setfill('0') << setw(3) << player3.posX<< "_";
-			os << setfill('0') << setw(3) << player3.posY<< "_";
-			os << setfill('0') << setw(2) << player3.score<<"_";
+			os << setfill('0') << setw(3) << player3.posX << "_";
+			os << setfill('0') << setw(3) << player3.posY << "_";
+			os << setfill('0') << setw(2) << player3.score << "_";
 
-			os << setfill('0') << setw(3) << player4.posX<< "_";
-			os << setfill('0') << setw(3) << player4.posY<< "_";
-			os << setfill('0') << setw(2) << player4.score<<"_";
+			os << setfill('0') << setw(3) << player4.posX << "_";
+			os << setfill('0') << setw(3) << player4.posY << "_";
+			os << setfill('0') << setw(2) << player4.score << "_";
 
-			os << player1.id<<"_";
-			os << player2.id<<"_";
-			os << player3.id<<"_";
+			os << player1.id << "_";
+			os << player2.id << "_";
+			os << player3.id << "_";
 			os << player4.id;
 
 
 
 			vector<int> clientIDs = server.getClientIDs();
-			for (int i = 0; i < clientIDs.size(); i++){
+			for (int i = 0; i < clientIDs.size(); i++) {
 				server.wsSend(clientIDs[i], os.str());
 			}
 			next = clock() + interval_clocks;
 			// cout << os.str()<<std::endl;
-		}	
-    }
+		}
+	}
 }
 
 
