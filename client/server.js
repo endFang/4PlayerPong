@@ -1,9 +1,19 @@
-//====================
-//       Server
-//====================
+//====================================
+//       connection to Server
+//====================================
 
 var Server;
 var gameOn = 0;
+
+$( "#start" ).click(function() {
+    $(this).attr("disabled", "disabled");
+    $("#quit").removeAttr("disabled");
+ });
+ $( "#quit" ).click(function() {
+      $(this).attr("disabled", "disabled");
+      $("#start").removeAttr("disabled");
+ });
+
 
 function log( text ) {
     $log = $('#log');
@@ -44,23 +54,35 @@ function connect(){
 
     //Log any messages sent from server
     Server.bind('message', function( payload ) {
+        
+        // log (payload);
         //initial gameState
-        if (payload.trim() === "init")
+        log (payload);
+        if (payload.indexOf("init") == 0)
         {
+            var input = payload;
+            var s = payload.split("_");
+            this.p1.userID = s[1];
+            this.p2.userID = s[2];
+            this.p3.userID = s[3];
+            this.p4.userID = s[4];
+
             gameOn = 1;
             Loop(payload);
+            
         }
         //quit game
         else if (payload.trim() === "quit")
         {
             gameOn = 0;
+            log ("Game Over");
+            disconnect();
             game.quit();
         }
         //receive new gameState
         else
         {
             Loop(payload);
-            // log (payload);
         }
     });
 
@@ -75,11 +97,12 @@ function disconnect(){
 
 
 function startGame() {
-    send("id:"+document.getElementById("userid").value);
-    send("init");
+    send(document.getElementById("userid").value+":"+"init");
 }
 
-function quitGame() { send("quit"); }
+function quitGame() { 
+    send(document.getElementById("userid").value+":"+"quit"); 
+}
 
 
 
@@ -130,6 +153,7 @@ function Display (x, y) {
     this.x = x;
     this.y = y;
     this.value = 0;
+    this.userID;
 }
 
 Display.prototype.draw = function (p){
@@ -194,21 +218,35 @@ Game.prototype.update = function (payload)
 {
         var input = payload;
         var s = payload.split("_");
+        
         this.ball.x = s[0];
         this.ball.y = s[1];
+        
         this.p1.x = s[2];
         this.p1.y = s[3];
         this.score1.value = Number(s[4]);
+
+        this.p2.x = s[5];
+        this.p3.y = s[6];
+        this.score2.value = Number(s[7]);
+
+        this.p3.x = s[8];
+        this.p3.y = s[9];
+        this.score3.value = Number(s[10]);
+
+        this.p4.x = s[11];
+        this.p4.y = s[12];
+        this.score4.value = Number(s[13]);
 }
 
 
 Game.prototype.control = function ()
 {
     if (this.keys.isPressed(68)){
-        send("r");
+        send(document.getElementById("userid").value+":"+"r");
     }
     else if (this.keys.isPressed(65)){
-        send("l");
+        send(document.getElementById("userid").value+":"+"l");
     }
 }
 
@@ -256,80 +294,3 @@ KeyListener.prototype.addKeyPressListener = function (key)
             callback(e);
     })
 }
-
-
-
-
-
-
-
-
-//pong legacy code
-/*
-Game.prototype.update = function ()
-{
-    if (this.paused)
-        return;
-
-    this.ball.update();
-
-    this.score1.value = this.p1.score;
-    
-    // control
-    if (this.keys.isPressed(68)){
-        this.p1.x = Math.min(this.width - this.p1.width, this.p1.x + 4);
-        send("r");
-    }
-    else if (this.keys.isPressed(65)){
-        this.p1.x = Math.max(0 , this.p1.x - 4);
-        send("l");
-    }
-
-    //collision detection
-    //left and right
-    if ((this.ball.vx < 0 && this.ball.x < 0) ||
-            (this.ball.vx > 0 && this.ball.x + this.ball.width > this.width)) {
-        this.ball.vx = -this.ball.vx;
-    }
-
-    //bottom and top
-    if ((this.ball.vy < 0))
-    {
-        //top
-        if (this.ball.y < 0)
-            this.ball.vy = -this.ball.vy;
-    }
-    else
-    {
-        //bottom
-        if (this.p1.y <= this.ball.y + this.ball.height)
-            //  && this.p1.y > this.ball.y - this.ball.vy + this.ball.height)
-        {
-            //collision distance
-            var d = this.ball.y + this.ball.height - this.p1.y;
-            //time
-            var t = d/this.ball.vy;
-            //x translate
-            var x = this.ball.vx*t + (this.ball.x - this.ball.vx)
-            if (x >= this.p1.x && x + this.ball.width <= this.p1.x + this.p1.width )
-            {
-                // this.ball.y = this.p1.y - this.ball.height;
-                // this.ball.x = Math.floor(this.ball.x-this.ball.vx+this.ball.vx*k);
-                this.ball.vy = -this.ball.vy;
-                this.score(this.p1);
-            }
-        }
-        if (this.ball.y > this.height)
-            this.ball.vy = -this.ball.vy;
-    }
-
-};
-
-
-// Ball.prototype.update = function ()
-// {
-//     this.x += this.vx;
-//     this.y += this.vy;
-// };
-
-*/

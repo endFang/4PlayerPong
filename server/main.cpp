@@ -10,14 +10,15 @@
 #include <cmath>
 #define NUM_THREADS 4
 
+//time interval
 #define INTERVAL_MS 0.1
 int interval_clocks = CLOCKS_PER_SEC * INTERVAL_MS / 1000;
 
 //#define PI 3.14159265
 
 using namespace std;
+int user;
 
-int count;
 std::pair<int, int> canvas;  //(x,y)
 
 struct Ball {
@@ -66,7 +67,7 @@ bool gameOn;
 /* called when a client connects */
 void openHandler(int clientID) {
 	vector<int> clientIDs = server.getClientIDs();
-	if (clientIDs.size() > 1) {
+	if (clientIDs.size() > 4) {
 		for (int i = 1; i < clientIDs.size(); i++) {
 			server.wsClose(i);
 		}
@@ -86,20 +87,41 @@ void closeHandler(int clientID){
 
 /* called when a client sends a message to the server */
 void messageHandler(int clientID, string message){
-    ostringstream os;
+	ostringstream os;
+	int _i;
 
+	// cout << message << endl;
     vector<int> clientIDs = server.getClientIDs();
-    if (message == "init")
+    if (message.find("init") != string::npos)
     {
-        os << "init";
-        for (int i = 0; i < clientIDs.size(); i++)
+		++user;
+		cout << "inside main: " << user << endl;
+		_i = message.find(":")-1;
+		string userID = message.substr(0,_i);
+
+		if (user == 1)
+			player1.id = userID;
+		if (user == 2)
+			player2.id = userID;
+		if (user == 3)
+			player3.id = userID;
+		if (user == 4)
 		{
-            server.wsSend(clientIDs[i], os.str());
-        }
-        gameOn = true;
+			player4.id = userID;
+			gameOn = true;
+			os << "init"<<"_";
+			os << player1.id << "_";
+			os << player2.id << "_";
+			os << player3.id << "_";
+			os << player4.id;
+			for (int i = 0; i < clientIDs.size(); i++)
+			{
+				server.wsSend(clientIDs[i], os.str());
+			}
+		}
     }
 
-    else if (message == "quit")
+    else if (message.find("quit") != string::npos)
     {
         os << "quit";
         for (int i = 0; i < clientIDs.size(); i++)
@@ -107,18 +129,45 @@ void messageHandler(int clientID, string message){
             server.wsSend(clientIDs[i], os.str());
         }
         gameOn = false;
+		--user;
+		cout << "inside main: " << user << endl;
     }
 
-	else if (message.find("id:") == 0)
-	{
-		player1.id = message;
-	}
+	else if (message.find("l") != string::npos) {
+		_i = message.find(":")-1;
+		string userID = message.substr(0,_i);
 
-	else if (message == "l") {
-		player1.posX = fmax(0, player1.posX - player1.speed);
+		cout << userID << endl;
+
+		if (userID == player1.id)
+			player1.posX = fmax(0, player1.posX - player1.speed);
+		
+		else if (userID == player2.id)
+			player2.posX = fmax(0, player2.posX - player2.speed);
+
+		else if (userID == player3.id)
+			player3.posY = fmax(0, player3.posY - player3.speed);
+		
+		else if (userID == player4.id)
+			player4.posY = fmax(0, player4.posY - player4.speed);
 	}
-	else if (message == "r") {
-		player1.posX = fmin(canvas.first-player1.width, player1.posX + player1.speed);
+	else if (message.find("r") != string::npos) {
+		_i = message.find(":")-1;
+		string userID = message.substr(0,_i);
+
+		cout << userID << endl;
+
+		if (userID == player1.id)
+			player1.posX = fmin(canvas.first-player1.width, player1.posX + player1.speed);
+			
+		else if (userID == player2.id)
+			player2.posX = fmin(canvas.first-player2.width, player2.posX + player2.speed);
+
+		else if (userID == player3.id)
+			player3.posY = fmin(canvas.second-player3.height, player3.posY + player3.speed);
+		
+		else if (userID == player4.id)
+			player4.posY = fmin(canvas.second-player4.height, player4.posY + player4.speed);
 	}
     
     
@@ -173,7 +222,21 @@ void periodicHandler() {
 			os << setfill('0') << setw(3) << ball.posY << "_";
 			os << setfill('0') << setw(3) << player1.posX<< "_";
 			os << setfill('0') << setw(3) << player1.posY<< "_";
-			os << setfill('0') << setw(2) << player1.score;
+			os << setfill('0') << setw(2) << player1.score<<"_";
+
+			os << setfill('0') << setw(3) << player2.posX<< "_";
+			os << setfill('0') << setw(3) << player2.posY<< "_";
+			os << setfill('0') << setw(2) << player2.score<<"_";
+
+			os << setfill('0') << setw(3) << player3.posX<< "_";
+			os << setfill('0') << setw(3) << player3.posY<< "_";
+			os << setfill('0') << setw(2) << player3.score<<"_";
+
+			os << setfill('0') << setw(3) << player4.posX<< "_";
+			os << setfill('0') << setw(3) << player4.posY<< "_";
+			os << setfill('0') << setw(2) << player4.score<<"_";
+
+
 			vector<int> clientIDs = server.getClientIDs();
 			for (int i = 0; i < clientIDs.size(); i++){
 				server.wsSend(clientIDs[i], os.str());
@@ -210,12 +273,7 @@ int main(int argc, char *argv[]){
 	player4.posX = 580;
 	player4.posY = canvas.second/2;
 
-
-	//port1 = 1000;
     /* set event handler */
-
-	
-    //server.setPeriodicHandler(periodicHandler);
 	server.setOpenHandler(openHandler);
 	server.setCloseHandler(closeHandler);
 	server.setMessageHandler(messageHandler);

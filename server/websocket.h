@@ -104,6 +104,7 @@ private:
     fd_set fds;
     int fdmax;
     int listenfd;
+    int userCount;
 
     void wsCheckIdleClients();
     bool wsSendClientMessage(int clientID, unsigned char opcode, string message);

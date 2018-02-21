@@ -29,9 +29,6 @@
 
 using namespace std;
 
-#define MAX_USER 4;
-int userCount;
-
 void showAvailableIP(){
 
 #ifdef __APPLE__
@@ -722,10 +719,11 @@ void webSocket::startServer(int port){
                     if (i == listenfd && userCount <= 4){
                         socklen_t addrlen = sizeof(cli_addr);
                         int newfd = accept(listenfd, (struct sockaddr*)&cli_addr, &addrlen);
-                        ++userCount;
                         if (newfd != -1){
                             /* add new client */
                             wsAddClient(newfd, cli_addr.sin_addr);
+                            ++userCount;
+                            cout << "after add: " << userCount << endl;
                             printf("New connection from %s on socket %d\n", inet_ntoa(cli_addr.sin_addr), newfd);
                         }
                     }
@@ -733,9 +731,15 @@ void webSocket::startServer(int port){
                         int nbytes = recv(i, buf, sizeof(buf), 0);
                         if (socketIDmap.find(i) != socketIDmap.end()){
                             if (nbytes < 0)
+                            {
                                 wsSendClientClose(socketIDmap[i], WS_STATUS_PROTOCOL_ERROR);
+                            }
                             else if (nbytes == 0)
+                            {
                                 wsRemoveClient(socketIDmap[i]);
+                                --userCount;
+                                cout << "after remove: " << userCount << endl;
+                            }
                             else {
                                 if (!wsProcessClient(socketIDmap[i], buf, nbytes))
                                     wsSendClientClose(socketIDmap[i], WS_STATUS_PROTOCOL_ERROR);
