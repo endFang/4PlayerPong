@@ -55,21 +55,11 @@ function connect(){
     //Log any messages sent from server
     Server.bind('message', function( payload ) {
         
-        // log (payload);
         //initial gameState
-        log (payload);
-        if (payload.indexOf("init") == 0)
+        if (payload.trim() === "init")
         {
-            var input = payload;
-            var s = payload.split("_");
-            this.p1.userID = s[1];
-            this.p2.userID = s[2];
-            this.p3.userID = s[3];
-            this.p4.userID = s[4];
-
             gameOn = 1;
-            Loop(payload);
-            
+            beginLoop();
         }
         //quit game
         else if (payload.trim() === "quit")
@@ -159,7 +149,7 @@ function Display (x, y) {
 Display.prototype.draw = function (p){
     p.font = "20px Georgia";
     p.fillText(this.value, this.x, this.y);
-    p.fillText(document.getElementById("userid").value, this.x, this.y+15);
+    p.fillText(this.userID, this.x, this.y+15);
 }
 
 
@@ -237,6 +227,11 @@ Game.prototype.update = function (payload)
         this.p4.x = s[11];
         this.p4.y = s[12];
         this.score4.value = Number(s[13]);
+
+        this.score1.userID = s[14];
+        this.score2.userID = s[15];
+        this.score3.userID = s[16];
+        this.score4.userID = s[17];
 }
 
 
@@ -257,6 +252,13 @@ Game.prototype.quit = function()
 
 
 var game = new Game();
+
+function beginLoop() {
+    if (gameOn == 1)
+    {
+        game.draw();
+    }
+}
 
 function Loop(payload) {
     if (gameOn == 1)

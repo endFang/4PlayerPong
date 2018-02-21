@@ -109,11 +109,7 @@ void messageHandler(int clientID, string message){
 		{
 			player4.id = userID;
 			gameOn = true;
-			os << "init"<<"_";
-			os << player1.id << "_";
-			os << player2.id << "_";
-			os << player3.id << "_";
-			os << player4.id;
+			os << "init";
 			for (int i = 0; i < clientIDs.size(); i++)
 			{
 				server.wsSend(clientIDs[i], os.str());
@@ -137,7 +133,7 @@ void messageHandler(int clientID, string message){
 		_i = message.find(":")-1;
 		string userID = message.substr(0,_i);
 
-		cout << userID << endl;
+		// cout << userID << endl;
 
 		if (userID == player1.id)
 			player1.posX = fmax(0, player1.posX - player1.speed);
@@ -149,13 +145,13 @@ void messageHandler(int clientID, string message){
 			player3.posY = fmax(0, player3.posY - player3.speed);
 		
 		else if (userID == player4.id)
-			player4.posY = fmax(0, player4.posY - player4.speed);
+			player4.posY = fmin(canvas.second-player4.height, player4.posY + player4.speed);
 	}
 	else if (message.find("r") != string::npos) {
 		_i = message.find(":")-1;
 		string userID = message.substr(0,_i);
 
-		cout << userID << endl;
+		// cout << userID << endl;
 
 		if (userID == player1.id)
 			player1.posX = fmin(canvas.first-player1.width, player1.posX + player1.speed);
@@ -167,7 +163,7 @@ void messageHandler(int clientID, string message){
 			player3.posY = fmin(canvas.second-player3.height, player3.posY + player3.speed);
 		
 		else if (userID == player4.id)
-			player4.posY = fmin(canvas.second-player4.height, player4.posY + player4.speed);
+			player4.posY = fmax(0, player4.posY - player4.speed);
 	}
     
     
@@ -235,6 +231,12 @@ void periodicHandler() {
 			os << setfill('0') << setw(3) << player4.posX<< "_";
 			os << setfill('0') << setw(3) << player4.posY<< "_";
 			os << setfill('0') << setw(2) << player4.score<<"_";
+
+			os << player1.id<<"_";
+			os << player2.id<<"_";
+			os << player3.id<<"_";
+			os << player4.id;
+
 
 
 			vector<int> clientIDs = server.getClientIDs();
