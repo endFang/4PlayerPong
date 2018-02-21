@@ -11,15 +11,17 @@
 #define NUM_THREADS 4
 
 //time interval
-#define INTERVAL_MS 0.1
+#define INTERVAL_MS 10
 int interval_clocks = CLOCKS_PER_SEC * INTERVAL_MS / 1000;
-
+int from_side = 20;
+int paddlex = 100;
+int paddley = 5;
 //#define PI 3.14159265
 
 using namespace std;
 int user;
 
-std::pair<int, int> canvas;  //(x,y)
+std::pair<int, int> canvas (600,500);  //(x,y)
 
 struct Ball {
 	int width;
@@ -43,11 +45,9 @@ struct Paddle {
 	int speed;
 	int score;
 
-	Paddle()
+	Paddle(int Width, int Height, int positionX, int positionY)
 		:speed(4), score(0)
-	{}
-
-	Paddle(int Width, int Height, int positionX, int positionY) {
+	{
 		width = Width;
 		height = Height;
 		posX = positionX;
@@ -56,10 +56,10 @@ struct Paddle {
 };
 
 Ball ball;
-Paddle player1;
-Paddle player2;
-Paddle player3;
-Paddle player4;
+Paddle player1(paddlex, paddley, canvas.first / 2, canvas.second-from_side);
+Paddle player2(paddlex, paddley, canvas.first / 2, from_side);
+Paddle player3(paddley, paddlex, from_side, canvas.second / 2);
+Paddle player4(paddley, paddlex, canvas.first-from_side, canvas.second / 2);
 
 webSocket server;
 bool gameOn;
@@ -172,9 +172,10 @@ void messageHandler(int clientID, string message){
 
 /* called once per select() loop */
 void periodicHandler() {
-	static time_t next = clock() + interval_clocks;
+	
     if (gameOn == true)
     {
+		static time_t next = clock() + interval_clocks;
 		clock_t current = clock();
 		if (current >= next) {
 			ball.posX += ball.velocityX;
@@ -253,9 +254,6 @@ void periodicHandler() {
 int main(int argc, char *argv[]){
 	
     gameOn = false;
-
-	canvas.first = 600; //width
-	canvas.second = 500; //height
 	//Ball ball;
 	ball.posX = canvas.first / 2;
 	ball.posY = canvas.second / 2;
@@ -263,6 +261,7 @@ int main(int argc, char *argv[]){
 	ball.velocityY = 5;
 
 	//Paddle players;
+	/*
 	player1.posX = canvas.first / 2;
 	player1.posY = 480;
 
@@ -274,7 +273,7 @@ int main(int argc, char *argv[]){
 
 	player4.posX = 580;
 	player4.posY = canvas.second/2;
-
+	*/
     /* set event handler */
 	server.setOpenHandler(openHandler);
 	server.setCloseHandler(closeHandler);
