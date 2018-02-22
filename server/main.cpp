@@ -23,19 +23,6 @@ int user;
 
 std::pair<int, int> canvas (600,500);  //(x,y)
 
-struct Ball {
-	int width;
-	int height;
-	int posX;
-	int posY;
-	int velocityX;
-	int velocityY;
-	int lastHit;
-	Ball()
-		:width(10), height(10), velocityX(5), velocityY(5), lastHit(0)
-	{}
-};
-
 struct Paddle {
 	string id;
 	int width;
@@ -52,6 +39,63 @@ struct Paddle {
 		height = Height;
 		posX = positionX;
 		posY = positionY;
+	}
+};
+
+struct Ball {
+	int width;
+	int height;
+	int posX;
+	int posY;
+	int velocityX;
+	int velocityY;
+	int lastHit;
+	double speed;
+	int maxAngle;
+
+	Ball()
+		:width(10), height(10), velocityX(5), velocityY(5), lastHit(0), speed(7), maxAngle(45)
+	{}
+
+	void paddleCollision(const Paddle& player) {
+		//speed += acceleration;
+
+		if (lastHit == 1 || lastHit == 2) {
+			double disFromCenter = (posX + (width / 2)) - (player.posX + (player.width / 2)); //ballCenterX - paddleCenterX
+			double ratio = disFromCenter / (player.width / 2);
+			calculateVelocity(maxAngle * ratio);
+
+			if (lastHit == 2)
+				velocityY = -velocityY;
+		}
+		else { //(lastHit == 3 || lastHit == 4)
+			double disFromCenter = (posY + (height / 2)) - (player.posY + (player.height / 2)); //ballCenterY - paddleCenterY
+			double ratio = disFromCenter / (player.height / 2);
+			calculateVelocity(maxAngle * ratio);
+
+			//rotate calculated velocity
+			int tempx = velocityX;
+			if (lastHit == 3)
+				velocityX = -velocityY;
+			else
+				velocityX = velocityY;
+			velocityY = tempx;
+			//cout << "Velocity: " << velocityX << ", " << velocityY << endl;
+		}
+	}
+
+	void calculateVelocity(double angleDegrees) {
+		double radians = angleDegrees * 3.14159265 / 180;
+		velocityX = roundNumber(speed * sin(radians));
+		velocityY = roundNumber(-speed * cos(radians));
+	}
+
+	int roundNumber(double num) {
+		if (num > 0.0)
+			num += 0.5;
+		else
+			num -= 0.5;
+		return (int)num;
 	}
 };
 
@@ -205,8 +249,9 @@ void periodicHandler() {
 				{
 					if (ball.posY >= player3.posY && ball.posY + ball.height <= player3.posY + player3.height)
 					{
-						ball.velocityX = -ball.velocityX;
 						ball.lastHit = 3;
+						//ball.velocityX = -ball.velocityX;
+						ball.paddleCollision(player3);
 					}
 				}
 
@@ -220,12 +265,11 @@ void periodicHandler() {
 			else {//((ball.velocityX > 0 && ball.posX + ball.width > canvas.first)) {
 				if (player4.posX <= ball.posX + ball.width)
 				{
-					//cout << "ball past p4\n";
 					if (ball.posY >= player4.posY && ball.posY + ball.height <= player4.posY + player4.height)
 					{
-						//cout << "ball collision\n";
-						ball.velocityX = -ball.velocityX;
 						ball.lastHit = 4;
+						//ball.velocityX = -ball.velocityX;
+						ball.paddleCollision(player4);
 					}
 				}
 
@@ -243,8 +287,9 @@ void periodicHandler() {
 				{
 					if (ball.posX >= player2.posX && ball.posX + ball.width <= player2.posX + player1.width)
 					{
-						ball.velocityY = -ball.velocityY;
 						ball.lastHit = 2;
+						//ball.velocityY = -ball.velocityY;
+						ball.paddleCollision(player2);
 					}
 				}
 				if (ball.posY < 0) {
@@ -260,8 +305,9 @@ void periodicHandler() {
 				{
 					if (ball.posX >= player1.posX && ball.posX + ball.width <= player1.posX + player1.width)
 					{
-						ball.velocityY = -ball.velocityY;
 						ball.lastHit = 1;
+						//ball.velocityY = -ball.velocityY;
+						ball.paddleCollision(player1);
 					}
 				}
 				if (ball.posY > canvas.second) {
