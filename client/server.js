@@ -3,6 +3,7 @@
 //====================================
 
 var Server;
+var instr;
 var gameOn = 0;
 
 $( "#start" ).click(function() {
@@ -87,7 +88,7 @@ function disconnect(){
 
 
 function startGame() {
-    send(document.getElementById("userid").value+":"+"init");
+    send(document.getElementById("userid").value+":"+"init"); 
 }
 
 function quitGame() { 
@@ -238,10 +239,10 @@ Game.prototype.update = function (payload)
 Game.prototype.control = function ()
 {
     if (this.keys.isPressed(68)){
-        send(document.getElementById("userid").value+":"+"r");
+        send(document.getElementById("userid").value+":"+"moveR");
     }
     else if (this.keys.isPressed(65)){
-        send(document.getElementById("userid").value+":"+"l");
+        send(document.getElementById("userid").value+":"+"moveL");
     }
 }
 

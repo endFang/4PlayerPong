@@ -24,7 +24,11 @@
         "string": "cpp",
         "string_view": "cpp",
         "ostream": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "iosfwd": "cpp",
+        "locale": "cpp",
+        "__split_buffer": "cpp",
+        "iostream": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }
