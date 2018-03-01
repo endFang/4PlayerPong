@@ -18,8 +18,9 @@ using namespace std::chrono;
 #define INTERVAL_MS 10
 int interval_clocks = CLOCKS_PER_SEC * INTERVAL_MS / 1000;
 
-//latency
+//received latency
 milliseconds rlatency = milliseconds(200);
+//send latency
 milliseconds slatency = milliseconds(200);
 
 //user
@@ -214,11 +215,11 @@ void periodicHandler() {
 	static time_t next = clock() + interval_clocks;
 	if (gameOn)
 	{
+		//buffers that needs to be deleted after the updates
 		vector<int> deleter;
 		for (int i = 0; i < receivedBuffer.size(); i++)
 		{
 			if (receivedBuffer[i].second <= now) {
-				cout << "here";
 				if (receivedBuffer.front().first.substr(receivedBuffer.front().first.find(":") + 1) == "l") {
 					_i = receivedBuffer[i].first.find(":") - 1;
 					string userID = receivedBuffer[i].first.substr(0, _i);
@@ -262,10 +263,12 @@ void periodicHandler() {
 				deleter.push_back(i);
 			}
 		}
+		//delete buffers
 		for (int i = deleter.size()-1; i >= 0; i--) {
 			receivedBuffer.erase(receivedBuffer.begin() + i);
 		}
-		
+
+		//game mechanics
 		clock_t current = clock();
 		if (current >= next) {
 			ball.posX += ball.velocityX;
@@ -279,7 +282,6 @@ void periodicHandler() {
 					if (ball.posY >= player3.posY && ball.posY + ball.height <= player3.posY + player3.height)
 					{
 						ball.lastHit = 3;
-						//ball.velocityX = -ball.velocityX;
 						ball.paddleCollision(player3);
 					}
 				}
@@ -291,13 +293,12 @@ void periodicHandler() {
 			}
 
 			//right
-			else {//((ball.velocityX > 0 && ball.posX + ball.width > canvas.first)) {
+			else {
 				if (player4.posX <= ball.posX + ball.width)
 				{
 					if (ball.posY >= player4.posY && ball.posY + ball.height <= player4.posY + player4.height)
 					{
 						ball.lastHit = 4;
-						//ball.velocityX = -ball.velocityX;
 						ball.paddleCollision(player4);
 					}
 				}
@@ -317,7 +318,6 @@ void periodicHandler() {
 					if (ball.posX >= player2.posX && ball.posX + ball.width <= player2.posX + player1.width)
 					{
 						ball.lastHit = 2;
-						//ball.velocityY = -ball.velocityY;
 						ball.paddleCollision(player2);
 					}
 				}
@@ -334,7 +334,6 @@ void periodicHandler() {
 					if (ball.posX >= player1.posX && ball.posX + ball.width <= player1.posX + player1.width)
 					{
 						ball.lastHit = 1;
-						//ball.velocityY = -ball.velocityY;
 						ball.paddleCollision(player1);
 					}
 				}
@@ -344,6 +343,7 @@ void periodicHandler() {
 				}
 			}
 
+			//string server sends to clients
 			ostringstream os;
 			os << setfill('0') << setw(3) << ball.posX << "_";
 			os << setfill('0') << setw(3) << ball.posY << "_";
@@ -367,6 +367,8 @@ void periodicHandler() {
 			os << player2.id << "_";
 			os << player3.id << "_";
 			os << player4.id;
+
+			//old send (no send buffer)
 			/*
 			vector<int> clientIDs = server.getClientIDs();
 			for (int i = 0; i < clientIDs.size(); i++) {
@@ -376,7 +378,11 @@ void periodicHandler() {
 			
 			vector<int> clientIDs = server.getClientIDs();
 			sendBuffer.push_back(std::pair<std::string, time_point<std::chrono::system_clock> >(os.str(), now + slatency));
+
+			//buffers that needs to be deleted after sending
 			vector<int> deletes;
+
+			//buffer that will be sent
 			int toSend = -1;
 
 			for (int i = 0; i < sendBuffer.size(); i++) {
