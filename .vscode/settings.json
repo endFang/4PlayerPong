@@ -28,7 +28,10 @@
         "iosfwd": "cpp",
         "locale": "cpp",
         "__split_buffer": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "sstream": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

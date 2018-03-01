@@ -55,6 +55,7 @@ function connect(){
 
     //Log any messages sent from server
     Server.bind('message', function( payload ) {
+        // log(payload);
         
         //initial gameState
         if (payload.trim() === "init")
