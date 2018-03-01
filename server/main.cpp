@@ -250,7 +250,7 @@ void periodicHandler() {
 					else if (userID == player4.id)
 						player4.posY = fmax(0, player4.posY - player4.speed);
 				}
-				if (receivedBuffer[i].first == "quit")
+				if (receivedBuffer[i].first.find("quit") != string::npos)
 				{
 					os << "quit";
 					for (int i = 0; i < clientIDs.size(); i++)
