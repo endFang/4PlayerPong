@@ -18,9 +18,10 @@ using namespace std::chrono;
 #define INTERVAL_MS 1
 int interval_clocks = CLOCKS_PER_SEC * INTERVAL_MS / 1000;
 
-//latency
-milliseconds rlatency = milliseconds(200);
-milliseconds slatency = milliseconds(200);
+//received latency
+milliseconds rlatency = milliseconds(1);
+//send latency
+milliseconds slatency = milliseconds(1);
 
 //user count
 int user;
@@ -32,7 +33,7 @@ int paddlex = 100;
 int paddley = 5;
 
 //canvas attributes
-std::pair<int, int> canvas (600,500);  //(x,y)
+std::pair<int, int> canvas(600, 500);  //(x,y)
 
 
 //buffer
@@ -120,10 +121,10 @@ struct Ball {
 
 
 Ball ball;
-Paddle player1(paddlex, paddley, canvas.first / 2, canvas.second-from_side);
+Paddle player1(paddlex, paddley, canvas.first / 2, canvas.second - from_side);
 Paddle player2(paddlex, paddley, canvas.first / 2, from_side);
 Paddle player3(paddley, paddlex, from_side, canvas.second / 2);
-Paddle player4(paddley, paddlex, canvas.first-from_side, canvas.second / 2);
+Paddle player4(paddley, paddlex, canvas.first - from_side, canvas.second / 2);
 
 webSocket server;
 bool gameOn;
@@ -158,133 +159,53 @@ void openHandler(int clientID) {
 }
 
 /* called when a client disconnects */
-void closeHandler(int clientID){
-    ostringstream os;
+void closeHandler(int clientID) {
+	ostringstream os;
 
-    vector<int> clientIDs = server.getClientIDs();
-    for (int i = 0; i < clientIDs.size(); i++){
-        if (clientIDs[i] != clientID)
-            server.wsSend(clientIDs[i], os.str());
-    }
+	vector<int> clientIDs = server.getClientIDs();
+	for (int i = 0; i < clientIDs.size(); i++) {
+		if (clientIDs[i] != clientID)
+			server.wsSend(clientIDs[i], os.str());
+	}
 }
 
 /* called when a client sends a message to the server */
-void messageHandler(int clientID, string message){
-	ostringstream os;
-	// int _i;
-
-    vector<int> clientIDs = server.getClientIDs();
-    if (message.find("init") != string::npos)
-    {
-		receivedBuffer.push_back(std::pair < std::string, time_point<std::chrono::system_clock> >(message, std::chrono::system_clock::now()+rlatency));
-		// ++user;
-		// _i = message.find(":")-1;
-		// string userID = message.substr(0,_i);
-
-		// if (user == 1)
-		// 	player1.id = userID;
-		// if (user == 2)
-		// 	player2.id = userID;
-		// if (user == 3)
-		// 	player3.id = userID;
-		// if (user == 4)
-		// {
-		// 	player4.id = userID;
-		// 	gameOn = true;
-		// 	os << "init";
-		// 	for (int i = 0; i < clientIDs.size(); i++)
-		// 	{
-		// 		server.wsSend(clientIDs[i], os.str());
-		// 	}
-		// }
-    }
-
-    else if (message.find("quit") != string::npos)
-    {
-		receivedBuffer.push_back(std::pair < std::string, time_point<std::chrono::system_clock> >(message, std::chrono::system_clock::now()+rlatency));
-        // os << "quit";
-        // for (int i = 0; i < clientIDs.size(); i++)
-		// {
-        //     server.wsSend(clientIDs[i], os.str());
-        // }
-        // gameOn = false;
-		// --user;
-		// cout << "inside main: " << user << endl;
-    }
-
-	else if (message.find("moveL") != string::npos) {
-		receivedBuffer.push_back(std::pair < std::string, time_point<std::chrono::system_clock> >(message, std::chrono::system_clock::now()+rlatency));
-		// _i = message.find(":")-1;
-		// string userID = message.substr(0,_i);
-
-
-		// if (userID == player1.id)
-		// 	player1.posX = fmax(0, player1.posX - player1.speed);
-		
-		// else if (userID == player2.id)
-		// 	player2.posX = fmax(0, player2.posX - player2.speed);
-
-		// else if (userID == player3.id)
-		// 	player3.posY = fmax(0, player3.posY - player3.speed);
-		
-		// else if (userID == player4.id)
-		// 	player4.posY = fmin(canvas.second-player4.height, player4.posY + player4.speed);
-	}
-	else if (message.find("moveR") != string::npos) {
-		receivedBuffer.push_back(std::pair < std::string, time_point<std::chrono::system_clock> >(message, std::chrono::system_clock::now()+rlatency));
-
-		// _i = message.find(":")-1;
-		// string userID = message.substr(0,_i);
-
-		// if (userID == player1.id)
-		// 	player1.posX = fmin(canvas.first-player1.width, player1.posX + player1.speed);
-			
-		// else if (userID == player2.id)
-		// 	player2.posX = fmin(canvas.first-player2.width, player2.posX + player2.speed);
-
-		// else if (userID == player3.id)
-		// 	player3.posY = fmin(canvas.second-player3.height, player3.posY + player3.speed);
-		
-		// else if (userID == player4.id)
-		// 	player4.posY = fmax(0, player4.posY - player4.speed);
-	}
-    
-    
-
+void messageHandler(int clientID, string message) {
+	receivedBuffer.push_back(std::pair < std::string, time_point<std::chrono::system_clock> >(message, std::chrono::system_clock::now()+rlatency));
 }
+
 
 /* called once per select() loop */
 void periodicHandler() {
 	static time_t next = clock() + interval_clocks;
-
-	ostringstream os;
+	// time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
 	vector<int> clientIDs = server.getClientIDs();
-
-	//wait for enough players when !gameOn
-	if (!gameOn)
-	{
-		if(!receivedBuffer.empty() 
-			&& receivedBuffer.front().first.find("init") != string::npos)
+	
+	//wait for user start game, only accept "init"
+	if (!gameOn) {
+		ostringstream os;
+		if(!receivedBuffer.empty()
+			&& receivedBuffer.front().second<=std::chrono::system_clock::now()
+			&& receivedBuffer.front().first.substr(receivedBuffer.front().first.find(":")+1) == "init")
 		{
 			++user;
 			_i = receivedBuffer.front().first.find(":")-1;
 			string userID = receivedBuffer.front().first.substr(0,_i);
-
 			if (user == 1)
 			{
 				player1.id = userID;
+				//for developing only
 				player2.id = userID;
 				player3.id = userID;
 				player4.id = userID;
-				gameOn = true;
+			 	gameOn = true;
 			 	os << "init";
-			 	for (int i = 0; i < clientIDs.size(); i++)
-			 	{
-					sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), std::chrono::system_clock::now()) );
-			 		// server.wsSend(clientIDs[i], os.str());
-			 	}
+				 sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), std::chrono::system_clock::now()+slatency));
+			 	// for (int i = 0; i < clientIDs.size(); i++)
+			 	// {
+			 	// 	sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), std::chrono::system_clock::now()+slatency));
+			 	// }
 			}
-				
 			// if (user == 2)
 			//  	player2.id = userID;
 			// if (user == 3)
@@ -296,66 +217,74 @@ void periodicHandler() {
 			//  	os << "init";
 			//  	for (int i = 0; i < clientIDs.size(); i++)
 			//  	{
-			// 		sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), std::chrono::system_clock::now()) );
-			//  		// server.wsSend(clientIDs[i], os.str());
+			//  		server.wsSend(clientIDs[i], os.str());
 			//  	}
 			// }
+			// if (!receivedBuffer.empty())
+			// 	cout << receivedBuffer.front().first << endl;
 			receivedBuffer.erase(receivedBuffer.begin());
 		}
 	}
 
-	//update the game state based on received cmds
 	if (gameOn)
 	{
-		if (!receivedBuffer.empty() && receivedBuffer.front().first.find("moveL") != string::npos)
+		ostringstream os;
+		//buffers that needs to be deleted after the updates
+		vector<int> deleter;
+		for (int i = 0; i < receivedBuffer.size(); i++)
 		{
-			_i = receivedBuffer.front().first.find(":") - 1;
-			string userID = receivedBuffer.front().first.substr(0, _i);
+			if (receivedBuffer[i].second <= std::chrono::system_clock::now()) {
+				if (receivedBuffer.front().first.substr(receivedBuffer.front().first.find(":") + 1) == "moveL") {
+					_i = receivedBuffer[i].first.find(":") - 1;
+					string userID = receivedBuffer[i].first.substr(0, _i);
 
-			if (userID == player1.id)
-				player1.posX = fmax(0, player1.posX - player1.speed);
-			else if (userID == player2.id)
-				player2.posX = fmax(0, player2.posX - player2.speed);
-			else if (userID == player3.id)
-				player3.posY = fmax(0, player3.posY - player3.speed);
-			else if (userID == player4.id)
-				player4.posY = fmin(canvas.second - player4.height, player4.posY + player4.speed);
-			receivedBuffer.erase(receivedBuffer.begin());
+					// cout << userID << endl;
+					if (userID == player1.id)
+						player1.posX = fmax(0, player1.posX - player1.speed);
+					else if (userID == player2.id)
+						player2.posX = fmax(0, player2.posX - player2.speed);
+					else if (userID == player3.id)
+						player3.posY = fmax(0, player3.posY - player3.speed);
+					else if (userID == player4.id)
+						player4.posY = fmin(canvas.second - player4.height, player4.posY + player4.speed);
+				}
+				if (receivedBuffer.front().first.substr(receivedBuffer.front().first.find(":") + 1) == "moveR")
+				{
+					_i = receivedBuffer[i].first.find(":") - 1;
+					string userID = receivedBuffer[i].first.substr(0, _i);
+					if (userID == player1.id)
+						player1.posX = fmin(canvas.first - player1.width, player1.posX + player1.speed);
+
+					else if (userID == player2.id)
+						player2.posX = fmin(canvas.first - player2.width, player2.posX + player2.speed);
+
+					else if (userID == player3.id)
+						player3.posY = fmin(canvas.second - player3.height, player3.posY + player3.speed);
+
+					else if (userID == player4.id)
+						player4.posY = fmax(0, player4.posY - player4.speed);
+				}
+				if (receivedBuffer[i].first.find("quit") != string::npos)
+				{
+					os << "quit";
+					sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), std::chrono::system_clock::now()+slatency));
+					// for (int i = 0; i < clientIDs.size(); i++)
+					// {
+					// 	sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), std::chrono::system_clock::now()+slatency));
+					// }
+					gameOn = false;
+					--user;
+				}
+				deleter.push_back(i);
+			}
 		}
-		else if ( !receivedBuffer.empty() && receivedBuffer.front().first.find("moveR") != string::npos)
-		{
-			_i = receivedBuffer.front().first.find(":") - 1;
-			string userID = receivedBuffer.front().first.substr(0, _i);
 
-			if (userID == player1.id)
-				player1.posX = fmin(canvas.first - player1.width, player1.posX + player1.speed);
-
-			else if (userID == player2.id)
-				player2.posX = fmin(canvas.first - player2.width, player2.posX + player2.speed);
-
-			else if (userID == player3.id)
-				player3.posY = fmin(canvas.second - player3.height, player3.posY + player3.speed);
-
-			else if (userID == player4.id)
-				player4.posY = fmax(0, player4.posY - player4.speed);
-			receivedBuffer.erase(receivedBuffer.begin());
-		}
-		else if (!receivedBuffer.empty() && receivedBuffer.front().first.find("quit") != string::npos)
-		{
-			gameOn = false;
-			// --user;
-			os << "quit";
-			sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), std::chrono::system_clock::now()));
-			receivedBuffer.erase(receivedBuffer.begin());
-			// for (int i = 0; i < clientIDs.size(); i++)
-			// {
-			// 	server.wsSend(clientIDs[i], os.str());
-			// }
-			// gameOn = false;
-			// --user;
+		//delete buffers
+		for (int i = deleter.size()-1; i >= 0; i--) {
+			receivedBuffer.erase(receivedBuffer.begin() + i);
 		}
 
-
+		//game mechanics
 		clock_t current = clock();
 		if (current >= next) {
 			ball.posX += ball.velocityX;
@@ -369,7 +298,6 @@ void periodicHandler() {
 					if (ball.posY >= player3.posY && ball.posY + ball.height <= player3.posY + player3.height)
 					{
 						ball.lastHit = 3;
-						//ball.velocityX = -ball.velocityX;
 						ball.paddleCollision(player3);
 					}
 				}
@@ -381,13 +309,12 @@ void periodicHandler() {
 			}
 
 			//right
-			else {//((ball.velocityX > 0 && ball.posX + ball.width > canvas.first)) {
+			else {
 				if (player4.posX <= ball.posX + ball.width)
 				{
 					if (ball.posY >= player4.posY && ball.posY + ball.height <= player4.posY + player4.height)
 					{
 						ball.lastHit = 4;
-						//ball.velocityX = -ball.velocityX;
 						ball.paddleCollision(player4);
 					}
 				}
@@ -407,7 +334,6 @@ void periodicHandler() {
 					if (ball.posX >= player2.posX && ball.posX + ball.width <= player2.posX + player1.width)
 					{
 						ball.lastHit = 2;
-						//ball.velocityY = -ball.velocityY;
 						ball.paddleCollision(player2);
 					}
 				}
@@ -424,7 +350,6 @@ void periodicHandler() {
 					if (ball.posX >= player1.posX && ball.posX + ball.width <= player1.posX + player1.width)
 					{
 						ball.lastHit = 1;
-						//ball.velocityY = -ball.velocityY;
 						ball.paddleCollision(player1);
 					}
 				}
@@ -434,6 +359,7 @@ void periodicHandler() {
 				}
 			}
 
+			//string server sends to clients
 			ostringstream os;
 			os << setfill('0') << setw(3) << ball.posX << "_";
 			os << setfill('0') << setw(3) << ball.posY << "_";
@@ -464,30 +390,55 @@ void periodicHandler() {
 			os << to_string(ms.count());
 
 			// vector<int> clientIDs = server.getClientIDs();
+			//old send (no send buffer)
+			/*
+			vector<int> clientIDs = server.getClientIDs();
 			for (int i = 0; i < clientIDs.size(); i++) {
 				server.wsSend(clientIDs[i], os.str());
 			}
-			next = clock() + interval_clocks;
-			// cout << os.str()<<std::endl;
+			*/
+			
+			sendBuffer.push_back(std::pair<std::string, time_point<std::chrono::system_clock> >(os.str(), std::chrono::system_clock::now()+slatency));
 		}
 	}
 
-	//now game state is updated, send it to clients
-	if (!sendBuffer.empty())
+	if (!sendBuffer.empty() && gameOn)
 	{
-		for (int i = 0; i < clientIDs.size(); i++)
-		{
-			server.wsSend(clientIDs[i], sendBuffer.front().first);
+		cout << "inside sending buffer" << endl;
+		//buffers that needs to be deleted after sending
+		vector<int> deletes;
+		//buffer that will be sent
+		int toSend = -1;
+
+		for (int i = 0; i < sendBuffer.size(); i++) {
+			if (sendBuffer[i].second <= std::chrono::system_clock::now()) {
+				deletes.push_back(i);
+				if (toSend != -1 && std::chrono::system_clock::now() - sendBuffer[i].second <= std::chrono::system_clock::now() - sendBuffer[toSend].second) {
+					toSend = i;
+				}
+				else if (toSend == -1) {
+					toSend = i;
+				}
+			}
 		}
-		sendBuffer.erase(sendBuffer.begin());
+		cout << toSend << endl;
+		if (toSend != -1)
+		{
+			for (int i = 0; i < clientIDs.size(); i++) {
+				server.wsSend(clientIDs[i], sendBuffer[toSend].first);
+			}
+		}
+		for (int i = deletes.size()-1; i >= 0; i--) {
+			sendBuffer.erase(sendBuffer.begin() + deletes[i]);
+		}
 	}
+
+	next = clock() + interval_clocks;
 }
 
 
-int main(int argc, char *argv[]){
-
-
-    gameOn = false;
+int main(int argc, char *argv[]) {
+	gameOn = false;
 
 	//Ball ball;
 	ball.posX = canvas.first / 2;
@@ -495,13 +446,13 @@ int main(int argc, char *argv[]){
 	ball.velocityX = 5;
 	ball.velocityY = 5;
 
-    /* set event handler */
+	/* set event handler */
 	server.setOpenHandler(openHandler);
 	server.setCloseHandler(closeHandler);
 	server.setMessageHandler(messageHandler);
 	server.setPeriodicHandler(periodicHandler);
 	server.startServer(8000);
-    /* start the chatroom server, listen to ip '127.0.0.1' and port '8000' */
+	/* start the chatroom server, listen to ip '127.0.0.1' and port '8000' */
 
-    return 1;
+	return 1;
 }
