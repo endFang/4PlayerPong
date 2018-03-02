@@ -26,7 +26,7 @@ milliseconds slatency = milliseconds(2000);
 
 
 //latency
-int latencyType = 0; // 0 == fixed, 1 = incremental, 2 = random
+int latencyType = 0; // 0 = fixed, 1 = incremental, 2 = random
 int latencyTime = 200;
 
 //calculateLatency(latencyType);

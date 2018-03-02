@@ -1,7 +1,7 @@
-With fixed latency, the game was lagging at a consistent rate as if the game was running at a slow and steady framerate. The input from the player was also delayed and the paddle would register the input after a set period of time. On a different computer the game seemed to run smoothly, but there was still some input delay.
+With fixed latency, the game was lagging at a consistent rate as if the game was running at a slow and steady framerate. The input from the player was also delayed and the paddle would register the input after a set period of time. On a different computer the game seemed to run smoothly, but there was still input delay with the paddle.
 
 With incremental latency, the lag got increasingly worse and the distance that the ball teleported steadily grew larger and larger. Player input also became increasingly more delayed as time went on. On a different computer the game seemed to run smoothly the entire time, but the input delay did get increasingly worse over time.
 
-With random latency, both the ball and the paddele were moving at a very inconsistent rate. They both seemed to teleport back and forth as they were moving and the paddle would eventually stop teleporting if it stayed still for a while. This same result was seen accross multiple computers.
+With random latency, both the ball and the paddele were moving at a very inconsistent rate. They both seemed to teleport back and forth as they were moving and the paddle would eventually stop teleporting if it stayed still for a while. It seemed as though the messages sent from the server to the client were delivered out of order. This same result was seen accross multiple computers.
 
 In all these tests, the time that it took to update the score when players did score a point was delayed, as well as the time it took to quit the game.
