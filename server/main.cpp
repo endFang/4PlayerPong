@@ -19,9 +19,9 @@ using namespace std::chrono;
 int interval_clocks = CLOCKS_PER_SEC * INTERVAL_MS / 1000;
 
 //received latency
-milliseconds rlatency = milliseconds(1);
+milliseconds rlatency = milliseconds(1000);
 //send latency
-milliseconds slatency = milliseconds(1);
+milliseconds slatency = milliseconds(2000);
 
 //user count
 int user;
@@ -178,14 +178,14 @@ void messageHandler(int clientID, string message) {
 /* called once per select() loop */
 void periodicHandler() {
 	static time_t next = clock() + interval_clocks;
-	// time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
+	time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
 	vector<int> clientIDs = server.getClientIDs();
 	
 	//wait for user start game, only accept "init"
 	if (!gameOn) {
 		ostringstream os;
 		if(!receivedBuffer.empty()
-			&& receivedBuffer.front().second<=std::chrono::system_clock::now()
+			&& receivedBuffer.front().second<=now
 			&& receivedBuffer.front().first.substr(receivedBuffer.front().first.find(":")+1) == "init")
 		{
 			++user;
@@ -200,11 +200,7 @@ void periodicHandler() {
 				player4.id = userID;
 			 	gameOn = true;
 			 	os << "init";
-				 sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), std::chrono::system_clock::now()+slatency));
-			 	// for (int i = 0; i < clientIDs.size(); i++)
-			 	// {
-			 	// 	sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), std::chrono::system_clock::now()+slatency));
-			 	// }
+				sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), now));
 			}
 			// if (user == 2)
 			//  	player2.id = userID;
@@ -233,7 +229,7 @@ void periodicHandler() {
 		vector<int> deleter;
 		for (int i = 0; i < receivedBuffer.size(); i++)
 		{
-			if (receivedBuffer[i].second <= std::chrono::system_clock::now()) {
+			if (receivedBuffer[i].second <=now) {
 				if (receivedBuffer.front().first.substr(receivedBuffer.front().first.find(":") + 1) == "moveL") {
 					_i = receivedBuffer[i].first.find(":") - 1;
 					string userID = receivedBuffer[i].first.substr(0, _i);
@@ -254,24 +250,17 @@ void periodicHandler() {
 					string userID = receivedBuffer[i].first.substr(0, _i);
 					if (userID == player1.id)
 						player1.posX = fmin(canvas.first - player1.width, player1.posX + player1.speed);
-
 					else if (userID == player2.id)
 						player2.posX = fmin(canvas.first - player2.width, player2.posX + player2.speed);
-
 					else if (userID == player3.id)
 						player3.posY = fmin(canvas.second - player3.height, player3.posY + player3.speed);
-
 					else if (userID == player4.id)
 						player4.posY = fmax(0, player4.posY - player4.speed);
 				}
 				if (receivedBuffer[i].first.find("quit") != string::npos)
 				{
 					os << "quit";
-					sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), std::chrono::system_clock::now()+slatency));
-					// for (int i = 0; i < clientIDs.size(); i++)
-					// {
-					// 	sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), std::chrono::system_clock::now()+slatency));
-					// }
+					sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), now));
 					gameOn = false;
 					--user;
 				}
@@ -397,43 +386,36 @@ void periodicHandler() {
 				server.wsSend(clientIDs[i], os.str());
 			}
 			*/
-			
-			sendBuffer.push_back(std::pair<std::string, time_point<std::chrono::system_clock> >(os.str(), std::chrono::system_clock::now()+slatency));
-		}
-	}
+			now = std::chrono::system_clock::now();
+			sendBuffer.push_back(std::pair<std::string, time_point<std::chrono::system_clock> >(os.str(), now+slatency));
 
-	if (!sendBuffer.empty() && gameOn)
-	{
-		cout << "inside sending buffer" << endl;
-		//buffers that needs to be deleted after sending
-		vector<int> deletes;
-		//buffer that will be sent
-		int toSend = -1;
+			//buffers that needs to be deleted after sending
+			vector<int> deletes;
+			//buffer that will be sent
+			int toSend = -1;
 
-		for (int i = 0; i < sendBuffer.size(); i++) {
-			if (sendBuffer[i].second <= std::chrono::system_clock::now()) {
-				deletes.push_back(i);
-				if (toSend != -1 && std::chrono::system_clock::now() - sendBuffer[i].second <= std::chrono::system_clock::now() - sendBuffer[toSend].second) {
-					toSend = i;
-				}
-				else if (toSend == -1) {
-					toSend = i;
+			for (int i = 0; i < sendBuffer.size(); i++){
+				if (sendBuffer[i].second <= now) {
+					deletes.push_back(i);
+					if (toSend != -1 && now - sendBuffer[i].second <= now - sendBuffer[toSend].second) {
+						toSend = i;
+					}
+					else if (toSend == -1) {
+						toSend = i;
+					}
 				}
 			}
-		}
-		cout << toSend << endl;
-		if (toSend != -1)
-		{
-			for (int i = 0; i < clientIDs.size(); i++) {
-				server.wsSend(clientIDs[i], sendBuffer[toSend].first);
+			if (toSend != -1){
+				for (int i = 0; i < clientIDs.size(); i++) {
+					server.wsSend(clientIDs[i], sendBuffer[toSend].first);
+				}
 			}
-		}
-		for (int i = deletes.size()-1; i >= 0; i--) {
-			sendBuffer.erase(sendBuffer.begin() + deletes[i]);
+			for (int i = deletes.size()-1; i >= 0; i--) {
+				sendBuffer.erase(sendBuffer.begin() + deletes[i]);
+			}
+			next = clock() + interval_clocks;
 		}
 	}
-
-	next = clock() + interval_clocks;
 }
 
 
