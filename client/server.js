@@ -55,10 +55,9 @@ function connect(){
 
     //Log any messages sent from server
     Server.bind('message', function( payload ) {
-        log("server sends message:" + payload);
-
-        var milliseconds = (new Date).getTime();
-        log ("client received at: " + milliseconds);
+        // log("server sends message:" + payload);
+        // var milliseconds = (new Date).getTime();
+        // log ("client received at: " + milliseconds);
         
         //initial gameState
         if (payload.trim() === "init")

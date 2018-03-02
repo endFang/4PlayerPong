@@ -26,7 +26,7 @@ milliseconds slatency = milliseconds(2000);
 
 
 //latency
-int latencyType = 1; // 0 == fixed, 1 = incremental, 2 = random
+int latencyType = 0; // 0 == fixed, 1 = incremental, 2 = random
 int latencyTime = 200;
 
 //calculateLatency(latencyType);
@@ -222,28 +222,26 @@ void periodicHandler() {
 			{
 				player1.id = userID;
 				//for developing only
-				player2.id = userID;
-				player3.id = userID;
-				player4.id = userID;
+				// player2.id = userID;
+				// player3.id = userID;
+				// player4.id = userID;
+			 	// gameOn = true;
+			 	// os << "init";
+				// calculateLatency(latencyType);
+				// sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), now));
+			}
+			if (user == 2)
+			 	player2.id = userID;
+			if (user == 3)
+			 	player3.id = userID;
+			if (user == 4)
+			{
+			 	player4.id = userID;
 			 	gameOn = true;
 			 	os << "init";
-				calculateLatency(latencyType);
-				sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), now));
+			 	calculateLatency(latencyType);
+				sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), now + slatency));
 			}
-			// if (user == 2)
-			//  	player2.id = userID;
-			// if (user == 3)
-			//  	player3.id = userID;
-			// if (user == 4)
-			// {
-			//  	player4.id = userID;
-			//  	gameOn = true;
-			//  	os << "init";
-			//  	for (int i = 0; i < clientIDs.size(); i++)
-			//  	{
-			//  		server.wsSend(clientIDs[i], os.str());
-			//  	}
-			// }
 			// if (!receivedBuffer.empty())
 			// 	cout << receivedBuffer.front().first << endl;
 			receivedBuffer.erase(receivedBuffer.begin());
@@ -289,7 +287,7 @@ void periodicHandler() {
 				{
 					os << "quit";
 					calculateLatency(latencyType);
-					sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), now));
+					sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), now+slatency));
 					gameOn = false;
 					--user;
 				}
