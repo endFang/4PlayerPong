@@ -9,6 +9,7 @@
 #include <cmath>
 #include <vector>
 #include <chrono>
+#include <cstdlib> //for random number generator
 
 using namespace std;
 using namespace std::chrono;
@@ -19,9 +20,34 @@ using namespace std::chrono;
 int interval_clocks = CLOCKS_PER_SEC * INTERVAL_MS / 1000;
 
 //received latency
-milliseconds rlatency = milliseconds(1000);
+milliseconds rlatency = milliseconds(2000);
 //send latency
 milliseconds slatency = milliseconds(2000);
+
+
+//latency
+int latencyType = 1; // 0 == fixed, 1 = incremental, 2 = random
+int latencyTime = 200;
+
+//calculateLatency(latencyType);
+void calculateLatency(int type) {
+	int min = 100;
+	int max = 2000;
+
+	if (type == 1) { //incremental
+		if (latencyTime <= max) {
+			latencyTime += 50;
+			rlatency = milliseconds(latencyTime);
+			slatency = milliseconds(latencyTime);
+		}
+	}
+	else if (type == 2) { //random
+		latencyTime = (rand() % (max - min + 1)) + min;
+		rlatency = milliseconds(latencyTime);
+		slatency = milliseconds(latencyTime);
+	}
+}
+
 
 //user count
 int user;
@@ -171,6 +197,7 @@ void closeHandler(int clientID) {
 
 /* called when a client sends a message to the server */
 void messageHandler(int clientID, string message) {
+	calculateLatency(latencyType);
 	receivedBuffer.push_back(std::pair < std::string, time_point<std::chrono::system_clock> >(message, std::chrono::system_clock::now()+rlatency));
 }
 
@@ -200,6 +227,7 @@ void periodicHandler() {
 				player4.id = userID;
 			 	gameOn = true;
 			 	os << "init";
+				calculateLatency(latencyType);
 				sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), now));
 			}
 			// if (user == 2)
@@ -260,6 +288,7 @@ void periodicHandler() {
 				if (receivedBuffer[i].first.find("quit") != string::npos)
 				{
 					os << "quit";
+					calculateLatency(latencyType);
 					sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), now));
 					gameOn = false;
 					--user;
@@ -387,6 +416,7 @@ void periodicHandler() {
 			}
 			*/
 			now = std::chrono::system_clock::now();
+			calculateLatency(latencyType);
 			sendBuffer.push_back(std::pair<std::string, time_point<std::chrono::system_clock> >(os.str(), now+slatency));
 
 			//buffers that needs to be deleted after sending
