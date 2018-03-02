@@ -1,0 +1,7 @@
+With fixed latency, the game was lagging at a consistent rate as if the game was running at a slow and steady framerate. The input from the player was also delayed and the paddle would register the input after a set period of time.
+
+With incremental latency, the lag got increasingly worse and the distance that the ball teleported steadily grew larger and larger. Player input also became increasingly more delayed as time went on.
+
+With random latency, the ball was moving at a very inconsistent rate. Sometimes the ball would make small leaps and sometimes much larger leaps. Player input would be recognized at an inconsistent rate with the paddle moving shortly after the player pressed the key and sometimes there were much longer gaps.
+
+In all these tests, the ball and the paddle had jumpy movement. Also the time that it took to update the score when players did score a point was delayed as well.
