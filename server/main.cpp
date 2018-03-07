@@ -222,26 +222,26 @@ void periodicHandler() {
 			{
 				player1.id = userID;
 				//for developing only
-				// player2.id = userID;
-				// player3.id = userID;
-				// player4.id = userID;
-			 	// gameOn = true;
-			 	// os << "init";
-				// calculateLatency(latencyType);
-				// sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), now));
-			}
-			if (user == 2)
-			 	player2.id = userID;
-			if (user == 3)
-			 	player3.id = userID;
-			if (user == 4)
-			{
-			 	player4.id = userID;
+				player2.id = userID;
+				player3.id = userID;
+				player4.id = userID;
 			 	gameOn = true;
 			 	os << "init";
-			 	calculateLatency(latencyType);
-				sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), now + slatency));
+				calculateLatency(latencyType);
+				sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), now));
 			}
+			// if (user == 2)
+			//  	player2.id = userID;
+			// if (user == 3)
+			//  	player3.id = userID;
+			// if (user == 4)
+			// {
+			//  	player4.id = userID;
+			//  	gameOn = true;
+			//  	os << "init";
+			//  	calculateLatency(latencyType);
+			// 	sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), now + slatency));
+			// }
 			// if (!receivedBuffer.empty())
 			// 	cout << receivedBuffer.front().first << endl;
 			receivedBuffer.erase(receivedBuffer.begin());

@@ -4,6 +4,7 @@
 
 var Server;
 var instr;
+var gsBuffer = ["empty"];
 var gameOn = 0;
 
 $( "#start" ).click(function() {
@@ -76,7 +77,9 @@ function connect(){
         //receive new gameState
         else
         {
-            Loop(payload);
+            //receive a new game state, 
+            gsBuffer.push(payload);
+            // Loop(payload);
         }
     });
 
@@ -102,9 +105,9 @@ function quitGame() {
 
 
 
-//====================
-//       Pong
-//====================
+//========================================
+//               Pong Code
+//========================================
 
 //====================
 //       Ball
@@ -257,20 +260,34 @@ Game.prototype.quit = function()
 
 var game = new Game();
 
+
 function beginLoop() {
     if (gameOn == 1)
     {
         game.draw();
     }
+    Loop();
 }
 
 function Loop(payload) {
     if (gameOn == 1)
     {
-        game.control();
-        game.update(payload);
-        game.draw();
+        if (gsBuffer.length != 0)
+        {
+            game.control();
+            game.update(gsBuffer[0]);
+            game.draw();
+            gsBuffer.splice(0, 1);
+        }
     }
+    requestAnimationFrame(Loop);
+
+    // if (gameOn == 1)
+    // {
+    //     game.control();
+    //     game.update(payload);
+    //     game.draw();
+    // }
 }
 
 
