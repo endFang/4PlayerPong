@@ -4,8 +4,11 @@
 
 var Server;
 var instr;
-var gsBuffer = ["empty"];
+var constructBuffer = [];
+var recvedBuffer = [];
+var seq = 0;
 var gameOn = 0;
+var identity;
 
 $( "#start" ).click(function() {
     $(this).attr("disabled", "disabled");
@@ -30,6 +33,7 @@ function send( text ) {
 }
 
 function connect(){
+    
     log('Connecting...');
     Server = new FancyWebSocket('ws://' + document.getElementById('ip').value + ':' + document.getElementById('port').value);
 
@@ -56,6 +60,7 @@ function connect(){
 
     //Log any messages sent from server
     Server.bind('message', function( payload ) {
+        //m3 printing 
         // log("server sends message:" + payload);
         // var milliseconds = (new Date).getTime();
         // log ("client received at: " + milliseconds);
@@ -78,7 +83,7 @@ function connect(){
         else
         {
             //receive a new game state, 
-            gsBuffer.push(payload);
+            recvedBuffer.push(payload);
             // Loop(payload);
         }
     });
@@ -245,7 +250,30 @@ Game.prototype.update = function (payload)
 Game.prototype.control = function ()
 {
     if (this.keys.isPressed(68)){
-        send(document.getElementById("userid").value+":"+"moveR");
+        //construct a new game state, render, store with seq
+        idnetity = document.getElementById("userid").value;
+        if (identity == this.score1.userID)
+        {
+            this.p1.x += 4;
+        }
+        else if (identity == this.score2.userID)
+        {
+            this.p2.x += 4;
+        }
+        else if (identity == this.score3.userID)
+        {
+            this.p3.y +=4;
+        }
+        else 
+        {
+            this.p4.y -= 4;
+        }
+        
+        var gs = [[this.ball.x, this.ball,y],[this.p1.x, this.p1.y],
+                    [this.p2.x, this.p2.y],[this.p3.x, this.p3.y],[this.p4.x, this.p4.y], [seq]];
+        constructBuffer.push(gs);
+        send(seq.toString()+ "_"+document.getElementById("userid").value+":"+"moveR");
+        ++seq;
     }
     else if (this.keys.isPressed(65)){
         send(document.getElementById("userid").value+":"+"moveL");
@@ -266,19 +294,38 @@ function beginLoop() {
     {
         game.draw();
     }
-    Loop();
+    // Loop();
 }
 
-function Loop(payload) {
+function Loop() {
     if (gameOn == 1)
     {
-        if (gsBuffer.length != 0)
+        if (recvedBuffer.length != 0)
+        {
+            var s = recvedBuffer[0].split("_");
+            //render received game state if wrong predict
+        }
+        else
         {
             game.control();
-            game.update(gsBuffer[0]);
             game.draw();
-            gsBuffer.splice(0, 1);
         }
+
+            // game.control();
+            // game.update(gsBuffer[0]);
+            // game.draw();
+            // //add the gamestate to another var
+            // gsBuffer.splice(0, 1);
+        // }
+
+
+        // if (gsBuffer.length >= 1)
+        // {
+        //     game.control();
+        //     game.update(gsBuffer[0]);
+        //     game.draw();
+        //     gsBuffer.splice(0, 1);
+        // }
     }
     requestAnimationFrame(Loop);
 

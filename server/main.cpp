@@ -19,6 +19,7 @@ using namespace std::chrono;
 #define INTERVAL_MS 1
 int interval_clocks = CLOCKS_PER_SEC * INTERVAL_MS / 1000;
 
+
 //received latency
 milliseconds rlatency = milliseconds(2000);
 //send latency
@@ -77,6 +78,7 @@ struct Paddle {
 	int posY;
 	int speed;
 	int score;
+	string seq;
 
 	Paddle(int Width, int Height, int positionX, int positionY)
 		:speed(4), score(0)
@@ -144,6 +146,8 @@ struct Ball {
 		return (int)num;
 	}
 };
+
+
 
 
 Ball ball;
@@ -258,22 +262,38 @@ void periodicHandler() {
 			if (receivedBuffer[i].second <=now) {
 				if (receivedBuffer.front().first.substr(receivedBuffer.front().first.find(":") + 1) == "moveL") {
 					_i = receivedBuffer[i].first.find(":") - 1;
-					string userID = receivedBuffer[i].first.substr(0, _i);
+					int _j = receivedBuffer[i].first.find("_");
+					string userID = receivedBuffer[i].first.substr(_j, _i);
+					string seqNumber = receivedBuffer[i].first.substr(0, _j);
 
 					// cout << userID << endl;
 					if (userID == player1.id)
+					{
 						player1.posX = fmax(0, player1.posX - player1.speed);
+						player1.seq = seqNumber;
+					}
 					else if (userID == player2.id)
+					{
 						player2.posX = fmax(0, player2.posX - player2.speed);
+						player2.seq = seqNumber;
+					}
 					else if (userID == player3.id)
+					{
 						player3.posY = fmax(0, player3.posY - player3.speed);
+						player3.seq = seqNumber;
+					}
 					else if (userID == player4.id)
+					{
 						player4.posY = fmin(canvas.second - player4.height, player4.posY + player4.speed);
+						player4.seq = seqNumber;
+					}
+						
 				}
 				if (receivedBuffer.front().first.substr(receivedBuffer.front().first.find(":") + 1) == "moveR")
 				{
 					_i = receivedBuffer[i].first.find(":") - 1;
-					string userID = receivedBuffer[i].first.substr(0, _i);
+					int _j = receivedBuffer[i].first.find("_");
+					string userID = receivedBuffer[i].first.substr(_j, _i);
 					if (userID == player1.id)
 						player1.posX = fmin(canvas.first - player1.width, player1.posX + player1.speed);
 					else if (userID == player2.id)
@@ -401,10 +421,12 @@ void periodicHandler() {
 			os << player4.id << "_";
 
 			//timestamp
-			milliseconds ms = duration_cast< milliseconds >(
-    		system_clock::now().time_since_epoch());
-			os << to_string(ms.count());
+			// milliseconds ms = duration_cast< milliseconds >(
+    		// system_clock::now().time_since_epoch());
+			// os << to_string(ms.count()) << "_";
 
+			os << player1.seq << "_" << player2.seq << "_" << player3.seq << "_" << player4.seq;
+ 
 			// vector<int> clientIDs = server.getClientIDs();
 			//old send (no send buffer)
 			/*
