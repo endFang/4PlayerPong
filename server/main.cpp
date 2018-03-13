@@ -16,8 +16,9 @@ using namespace std::chrono;
 
 
 //time interval
-#define INTERVAL_MS 1
-int interval_clocks = CLOCKS_PER_SEC * INTERVAL_MS / 1000;
+// #define INTERVAL_MS 1
+// int interval_clocks = CLOCKS_PER_SEC * INTERVAL_MS / 1000;
+int interval_clocks = CLOCKS_PER_SEC * 1 / 60;
 
 
 //received latency
@@ -81,7 +82,7 @@ struct Paddle {
 	string seq;
 
 	Paddle(int Width, int Height, int positionX, int positionY)
-		:speed(4), score(0)
+		:speed(4), score(0), seq("0")
 	{
 		width = Width;
 		height = Height;
@@ -220,7 +221,7 @@ void periodicHandler() {
 			&& receivedBuffer.front().first.substr(receivedBuffer.front().first.find(":")+1) == "init")
 		{
 			++user;
-			_i = receivedBuffer.front().first.find(":")-1;
+			_i = receivedBuffer.front().first.find(":");
 			string userID = receivedBuffer.front().first.substr(0,_i);
 			if (user == 1)
 			{
@@ -261,9 +262,9 @@ void periodicHandler() {
 		{
 			if (receivedBuffer[i].second <=now) {
 				if (receivedBuffer.front().first.substr(receivedBuffer.front().first.find(":") + 1) == "moveL") {
-					_i = receivedBuffer[i].first.find(":") - 1;
+					_i = receivedBuffer[i].first.find(":");
 					int _j = receivedBuffer[i].first.find("_");
-					string userID = receivedBuffer[i].first.substr(_j, _i);
+					string userID = receivedBuffer[i].first.substr(_j+1, _i-2);
 					string seqNumber = receivedBuffer[i].first.substr(0, _j);
 
 					// cout << userID << endl;
@@ -289,20 +290,38 @@ void periodicHandler() {
 					}
 						
 				}
+
 				if (receivedBuffer.front().first.substr(receivedBuffer.front().first.find(":") + 1) == "moveR")
 				{
-					_i = receivedBuffer[i].first.find(":") - 1;
+					_i = receivedBuffer[i].first.find(":");
 					int _j = receivedBuffer[i].first.find("_");
-					string userID = receivedBuffer[i].first.substr(_j, _i);
+					string userID = receivedBuffer[i].first.substr(_j+1, _i-2);
+					string seqNumber = receivedBuffer[i].first.substr(0, _j);
+
 					if (userID == player1.id)
+					{
 						player1.posX = fmin(canvas.first - player1.width, player1.posX + player1.speed);
+						player1.seq = seqNumber;
+						// cout << "player1.seq: " << player1.seq << endl;
+					}
+						
 					else if (userID == player2.id)
+					{
 						player2.posX = fmin(canvas.first - player2.width, player2.posX + player2.speed);
+						player2.seq = seqNumber;
+					}
 					else if (userID == player3.id)
+					{
 						player3.posY = fmin(canvas.second - player3.height, player3.posY + player3.speed);
+						player3.seq = seqNumber;
+					}
 					else if (userID == player4.id)
+					{
 						player4.posY = fmax(0, player4.posY - player4.speed);
+						player4.seq = seqNumber;
+					}
 				}
+
 				if (receivedBuffer[i].first.find("quit") != string::npos)
 				{
 					os << "quit";
@@ -396,48 +415,43 @@ void periodicHandler() {
 			}
 
 			//string server sends to clients
-			ostringstream os;
-			os << setfill('0') << setw(3) << ball.posX << "_";
-			os << setfill('0') << setw(3) << ball.posY << "_";
-			os << setfill('0') << setw(3) << player1.posX << "_";
-			os << setfill('0') << setw(3) << player1.posY << "_";
-			os << setfill('0') << setw(2) << player1.score << "_";
+			ostringstream serverGameState;
+			serverGameState << setfill('0') << setw(3) << ball.posX << "_";
+			serverGameState << setfill('0') << setw(3) << ball.posY << "_";
+			serverGameState << setfill('0') << setw(3) << player1.posX << "_";
+			serverGameState << setfill('0') << setw(3) << player1.posY << "_";
+			serverGameState << setfill('0') << setw(2) << player1.score << "_";
 
-			os << setfill('0') << setw(3) << player2.posX << "_";
-			os << setfill('0') << setw(3) << player2.posY << "_";
-			os << setfill('0') << setw(2) << player2.score << "_";
+			serverGameState << setfill('0') << setw(3) << player2.posX << "_";
+			serverGameState << setfill('0') << setw(3) << player2.posY << "_";
+			serverGameState << setfill('0') << setw(2) << player2.score << "_";
 
-			os << setfill('0') << setw(3) << player3.posX << "_";
-			os << setfill('0') << setw(3) << player3.posY << "_";
-			os << setfill('0') << setw(2) << player3.score << "_";
+			serverGameState << setfill('0') << setw(3) << player3.posX << "_";
+			serverGameState << setfill('0') << setw(3) << player3.posY << "_";
+			serverGameState << setfill('0') << setw(2) << player3.score << "_";
 
-			os << setfill('0') << setw(3) << player4.posX << "_";
-			os << setfill('0') << setw(3) << player4.posY << "_";
-			os << setfill('0') << setw(2) << player4.score << "_";
+			serverGameState << setfill('0') << setw(3) << player4.posX << "_";
+			serverGameState << setfill('0') << setw(3) << player4.posY << "_";
+			serverGameState << setfill('0') << setw(2) << player4.score << "_";
 
-			os << player1.id << "_";
-			os << player2.id << "_";
-			os << player3.id << "_";
-			os << player4.id << "_";
+			serverGameState << player1.id << "_";
+			serverGameState << player2.id << "_";
+			serverGameState << player3.id << "_";
+			serverGameState << player4.id << "_";
 
-			//timestamp
+			//timestamp for milestone 3
 			// milliseconds ms = duration_cast< milliseconds >(
     		// system_clock::now().time_since_epoch());
 			// os << to_string(ms.count()) << "_";
 
-			os << player1.seq << "_" << player2.seq << "_" << player3.seq << "_" << player4.seq;
+			serverGameState << player1.seq << "_" << player2.seq << "_" << player3.seq << "_" << player4.seq;
+
+			// cout << "constructed string: " << serverGameState.str() << endl;
  
-			// vector<int> clientIDs = server.getClientIDs();
-			//old send (no send buffer)
-			/*
-			vector<int> clientIDs = server.getClientIDs();
-			for (int i = 0; i < clientIDs.size(); i++) {
-				server.wsSend(clientIDs[i], os.str());
-			}
-			*/
+			
 			now = std::chrono::system_clock::now();
 			calculateLatency(latencyType);
-			sendBuffer.push_back(std::pair<std::string, time_point<std::chrono::system_clock> >(os.str(), now+slatency));
+			sendBuffer.push_back(std::pair<std::string, time_point<std::chrono::system_clock> >(serverGameState.str(), now+slatency));
 
 			//buffers that needs to be deleted after sending
 			vector<int> deletes;
@@ -457,6 +471,7 @@ void periodicHandler() {
 			}
 			if (toSend != -1){
 				for (int i = 0; i < clientIDs.size(); i++) {
+					cout << sendBuffer[toSend].first << endl;
 					server.wsSend(clientIDs[i], sendBuffer[toSend].first);
 				}
 			}
