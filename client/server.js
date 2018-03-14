@@ -105,6 +105,7 @@ function startGame() {
 }
 
 function quitGame() { 
+    gameOn = 0;
     send(identity.value+":"+"quit"); 
 }
 
@@ -368,37 +369,53 @@ function Loop() {
         //received serverGameState
         if (recvedBuffer.length != 0)
         {
+            log("serverGameState: " + recvedBuffer[0]);
             var s = recvedBuffer[0].split("_");
             //player 1
             if (identity == s[14] && constructBuffer.length > 0)
             {
+                log ("it's player 1");
+                var del; 
+                log("serverGameState: " + recvedBuffer[0]);
                 for (var i=0; i<constructBuffer.length; ++i)
                 {
                     //the predicted clientGameState to compare
-                    
+                    log("in "+i);
                     var gs = constructBuffer[i];
-                    log(gs);
                     //check seq
+                    log("serverGameState: " + recvedBuffer[0]);
                     if (gs[5][0] == s[18])
                     {
-                        log("seq confirm");
+                        log("serverGameState: " + recvedBuffer[0]);
+                        del = i;
+                        log ("find the seq");
                         //preicted clientGameState != serverGameState
                         //re-render
+                        log("serverGameState: " + recvedBuffer[0]);
                         if (gs[1][0].toString() !=  s[2])
                         {
+                            log ("not correct rendering");
+                            log("serverGameState: " + recvedBuffer[0]);
                             game.update(recvedBuffer[0]);
                             game.draw();
-                            recvedBuffer.splice(0,1);
                         }
+                        recvedBuffer.splice(0,1);
 
-                        //remove all prediction before this prediction
-                        for (var j=0; j<i; ++j)
+                        /*for (var j=0; j<=i; ++j)
                         {
-                            log ("inside deleting");
                             constructBuffer.splice(0,1);
-                        }
+                        }*/
+
+                        break;
+                    }
+                    else
+                    {
+                        recvedBuffer.splice(0,1);
+                        break;
                     }
                 }
+                //remove all prediction before this prediction
+                constructBuffer.splice(0,del+1);
             }
 
             //player 2
