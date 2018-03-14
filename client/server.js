@@ -10,79 +10,76 @@ var seq = 0;
 var gameOn = 0;
 var identity;
 
-$( "#start" ).click(function() {
+$("#start").click(function () {
     $(this).attr("disabled", "disabled");
     $("#quit").removeAttr("disabled");
- });
- $( "#quit" ).click(function() {
-      $(this).attr("disabled", "disabled");
-      $("#start").removeAttr("disabled");
- });
+});
+$("#quit").click(function () {
+    $(this).attr("disabled", "disabled");
+    $("#start").removeAttr("disabled");
+});
 
 
-function log( text ) {
+function log(text) {
     $log = $('#log');
     //Add text to log
-    $log.append(($log.val()?"\n":'')+text);
+    $log.append(($log.val() ? "\n" : '') + text);
     //Autoscroll
     $log[0].scrollTop = $log[0].scrollHeight - $log[0].clientHeight;
 }
 
-function send( text ) {
-    Server.send( 'message', text );
+function send(text) {
+    Server.send('message', text);
 }
 
-function connect(){
-    
+function connect() {
+
     log('Connecting...');
     Server = new FancyWebSocket('ws://' + document.getElementById('ip').value + ':' + document.getElementById('port').value);
 
-    $('#message').keypress(function(e) {
-        if ( e.keyCode == 13 && this.value ) {
-            log( 'You: ' + this.value );
-            send( this.value );
+    $('#message').keypress(function (e) {
+        if (e.keyCode == 13 && this.value) {
+            log('You: ' + this.value);
+            send(this.value);
 
             $(this).val('');
         }
     });
 
     //Let the user know we're connected
-    Server.bind('open', function() {
+    Server.bind('open', function () {
         document.getElementById("cntBtn").disabled = true;
-        log( "Connected." );
+        log("Connected.");
     });
 
     //OH NOES! Disconnection occurred.
-    Server.bind('close', function( data ) {
+    Server.bind('close', function (data) {
         document.getElementById("cntBtn").disabled = false;
-        log( "Disconnected." );
+        log("Disconnected.");
     });
 
     //Log any messages sent from server
-    Server.bind('message', function( payload ) {
+    Server.bind('message', function (payload) {
         //m3 printing 
         // log("server sends message:" + payload);
         // var milliseconds = (new Date).getTime();
         // log ("client received at: " + milliseconds);
-        
+
         //initial gameState
-        if (payload.trim() === "init")
-        {
+        if (payload.trim() === "init") {
             gameOn = 1;
             idnetity = document.getElementById("userid").value;
             beginLoop();
         }
-        //quit game
-        else if (payload.trim() === "quit")
-        {
+            //quit game
+        else if (payload.trim() === "quit") {
             gameOn = 0;
-            log ("Game Over");
+            log("Game Over");
             disconnect();
             game.quit();
         }
-        //receive new gameState
-        else
-        {
+            //receive new gameState
+        else {
             //receive a new game state, 
             recvedBuffer.push(payload);
             // Loop(payload);
@@ -93,7 +90,7 @@ function connect(){
 
 }
 
-function disconnect(){
+function disconnect() {
     log("Disconnecting...");
     Server.disconnect();
 }
@@ -101,12 +98,12 @@ function disconnect(){
 
 function startGame() {
     identity = document.getElementById("userid").value;
-    send(identity+":"+"init"); 
+    send(identity + ":" + "init");
 }
 
-function quitGame() { 
+function quitGame() {
     gameOn = 0;
-    send(identity.value+":"+"quit"); 
+    send(identity.value + ":" + "quit");
 }
 
 
@@ -128,8 +125,7 @@ function Ball() {
 };
 
 
-Ball.prototype.draw = function (p)
-{
+Ball.prototype.draw = function (p) {
     p.fillRect(this.x, this.y, this.width, this.height);
 };
 
@@ -137,7 +133,7 @@ Ball.prototype.draw = function (p)
 //====================
 //       Paddle
 //====================
-function Paddle (x,y,w,h) {
+function Paddle(x, y, w, h) {
     this.x = x;
     this.y = y;
     this.width = w;
@@ -145,8 +141,7 @@ function Paddle (x,y,w,h) {
     // this.score = 0;
 }
 
-Paddle.prototype.draw = function (p)
-{
+Paddle.prototype.draw = function (p) {
     p.fillRect(this.x, this.y, this.width, this.height);
 }
 
@@ -154,17 +149,17 @@ Paddle.prototype.draw = function (p)
 //====================
 //       Display for ID & Score
 //====================
-function Display (x, y) {
+function Display(x, y) {
     this.x = x;
     this.y = y;
     this.value = 0;
     this.userID;
 }
 
-Display.prototype.draw = function (p){
+Display.prototype.draw = function (p) {
     p.font = "20px Georgia";
     p.fillText(this.value, this.x, this.y);
-    p.fillText(this.userID, this.x, this.y+15);
+    p.fillText(this.userID, this.x, this.y + 15);
 }
 
 
@@ -182,17 +177,17 @@ function Game() {
     this.keys = new KeyListener();
 
     //initialize paddles
-    this.p1 = new Paddle(this.width/2, 480, 100, 5);
-    this.score1 = new Display(this.width/4, 480)
+    this.p1 = new Paddle(this.width / 2, 480, 100, 5);
+    this.score1 = new Display(this.width / 4, 480)
 
-    this.p2 = new Paddle(this.width/2, 20, 100, 5);
-    this.score2 = new Display(this.width*3/4, 20)
+    this.p2 = new Paddle(this.width / 2, 20, 100, 5);
+    this.score2 = new Display(this.width * 3 / 4, 20)
 
-    this.p3 = new Paddle(20, this.height/2, 5, 100);
-    this.score3 = new Display(20, this.height/4)
+    this.p3 = new Paddle(20, this.height / 2, 5, 100);
+    this.score3 = new Display(20, this.height / 4)
 
-    this.p4 = new Paddle(580, this.height/2, 5, 100);
-    this.score4 = new Display(550, this.height*3/4)
+    this.p4 = new Paddle(580, this.height / 2, 5, 100);
+    this.score4 = new Display(550, this.height * 3 / 4)
 
 
     //initailzie the ball
@@ -201,107 +196,96 @@ function Game() {
 }
 
 
-Game.prototype.draw = function()
-{
+Game.prototype.draw = function () {
     this.context.clearRect(0, 0, this.width, this.height);
     this.ball.draw(this.context);
-    
+
     this.p1.draw(this.context);
     this.score1.draw(this.context);
-    
+
     this.p2.draw(this.context);
     this.score2.draw(this.context);
-    
+
     this.p3.draw(this.context);
     this.score3.draw(this.context);
-    
+
     this.p4.draw(this.context);
     this.score4.draw(this.context);
 }
 
-Game.prototype.update = function (payload)
-{
-        var input = payload;
-        var s = payload.split("_");
-        
-        this.ball.x = s[0];
-        this.ball.y = s[1];
-        
-        this.p1.x = s[2];
-        this.p1.y = s[3];
-        this.score1.value = Number(s[4]);
+Game.prototype.update = function (payload) {
+    var input = payload;
+    var s = payload.split("_");
 
-        this.p2.x = s[5];
-        this.p3.y = s[6];
-        this.score2.value = Number(s[7]);
+    this.ball.x = s[0];
+    this.ball.y = s[1];
 
-        this.p3.x = s[8];
-        this.p3.y = s[9];
-        this.score3.value = Number(s[10]);
+    this.p1.x = s[2];
+    this.p1.y = s[3];
+    this.score1.value = Number(s[4]);
 
-        this.p4.x = s[11];
-        this.p4.y = s[12];
-        this.score4.value = Number(s[13]);
+    this.p2.x = s[5];
+    this.p3.y = s[6];
+    this.score2.value = Number(s[7]);
 
-        this.score1.userID = s[14];
-        this.score2.userID = s[15];
-        this.score3.userID = s[16];
-        this.score4.userID = s[17];
+    this.p3.x = s[8];
+    this.p3.y = s[9];
+    this.score3.value = Number(s[10]);
+
+    this.p4.x = s[11];
+    this.p4.y = s[12];
+    this.score4.value = Number(s[13]);
+
+    this.score1.userID = s[14];
+    this.score2.userID = s[15];
+    this.score3.userID = s[16];
+    this.score4.userID = s[17];
 }
 
 
-Game.prototype.control = function ()
-{
-    if (this.keys.isPressed(68)){
+Game.prototype.control = function () {
+    if (this.keys.isPressed(68)) {
         //move paddle to right 1 unit
         //predict clientGameState
-        if (identity == this.score1.userID)
-        {
+        if (identity == this.score1.userID) {
             this.p1.x += 4;
         }
-        else if (identity == this.score2.userID)
-        {
+        else if (identity == this.score2.userID) {
             this.p2.x += 4;
         }
-        else if (identity == this.score3.userID)
-        {
-            this.p3.y +=4;
+        else if (identity == this.score3.userID) {
+            this.p3.y += 4;
         }
-        else 
-        {
+        else {
             this.p4.y -= 4;
         }
-        
+
         //store predicted clientGameState for later comparison
         var gs = [[this.ball.x, this.ball.y],
                     [this.p1.x, this.p1.y],
                     [this.p2.x, this.p2.y],
                     [this.p3.x, this.p3.y],
-                    [this.p4.x, this.p4.y], 
+                    [this.p4.x, this.p4.y],
                     [seq]];
         constructBuffer.push(gs);
 
         //send input to server
-        send(seq.toString()+ "_"+identity+":"+"moveR");
+        send(seq.toString() + "_" + identity + ":" + "moveR");
         ++seq;
     }
-    else if (this.keys.isPressed(65)){
+    else if (this.keys.isPressed(65)) {
         //move paddle to left 1 unit
         //predict clientGameState
-        if (identity == this.score1.userID)
-        {
+        if (identity == this.score1.userID) {
             this.p1.x -= 4;
         }
-        else if (identity == this.score2.userID)
-        {
+        else if (identity == this.score2.userID) {
             this.p2.x -= 4;
         }
-        else if (identity == this.score3.userID)
-        {
-            this.p3.y -=4;
+        else if (identity == this.score3.userID) {
+            this.p3.y -= 4;
         }
-        else 
-        {
+        else {
             this.p4.y += 4;
         }
 
@@ -310,18 +294,17 @@ Game.prototype.control = function ()
                     [this.p1.x, this.p1.y],
                     [this.p2.x, this.p2.y],
                     [this.p3.x, this.p3.y],
-                    [this.p4.x, this.p4.y], 
+                    [this.p4.x, this.p4.y],
                     [seq]];
         constructBuffer.push(gs);
 
         //send input to server
-        send(seq.toString()+ "_"+identity+":"+"moveL");
+        send(seq.toString() + "_" + identity + ":" + "moveL");
         ++seq;
     }
 }
 
-Game.prototype.quit = function()
-{
+Game.prototype.quit = function () {
     this.context.clearRect(0, 0, this.width, this.height);
 }
 
@@ -338,8 +321,7 @@ var game = new Game();
 
 //draw the initial clientGameState
 function beginLoop() {
-    if (gameOn == 1)
-    {
+    if (gameOn == 1) {
         game.draw();
     }
     Loop();
@@ -364,58 +346,44 @@ function beginLoop() {
 
 //take input, update clientGameState, render clientGameState
 function Loop() {
-    if (gameOn == 1)
-    {
+    if (gameOn == 1) {
         //received serverGameState
-        if (recvedBuffer.length != 0)
-        {
-            log("serverGameState: " + recvedBuffer[0]);
+
+        if (recvedBuffer.length != 0) {
+            //log("serverGameState: " + recvedBuffer[0]);
             var s = recvedBuffer[0].split("_");
             //player 1
-            if (identity == s[14] && constructBuffer.length > 0)
-            {
-                log ("it's player 1");
-                var del; 
-                log("serverGameState: " + recvedBuffer[0]);
-                for (var i=0; i<constructBuffer.length; ++i)
-                {
+            if (identity == s[14] && constructBuffer.length > 0) {
+                //log("it's player 1");
+                var del;
+                var cl = constructBuffer.length;
+                for (var i = 0; i < cl; ++i) {
                     //the predicted clientGameState to compare
-                    log("in "+i);
+                    //log("in " + i);
                     var gs = constructBuffer[i];
                     //check seq
-                    log("serverGameState: " + recvedBuffer[0]);
-                    if (gs[5][0] == s[18])
-                    {
-                        log("serverGameState: " + recvedBuffer[0]);
+                    if (gs[5][0] == s[18]) {
                         del = i;
-                        log ("find the seq");
+                        //log("find the seq");
                         //preicted clientGameState != serverGameState
                         //re-render
-                        log("serverGameState: " + recvedBuffer[0]);
-                        if (gs[1][0].toString() !=  s[2])
-                        {
-                            log ("not correct rendering");
-                            log("serverGameState: " + recvedBuffer[0]);
+                        if (gs[1][0].toString() != s[2]) {
+                            //log("not correct rendering");
+                            //log("serverGameState: " + recvedBuffer[0]);
                             game.update(recvedBuffer[0]);
                             game.draw();
                         }
-                        recvedBuffer.splice(0,1);
-
-                        /*for (var j=0; j<=i; ++j)
-                        {
-                            constructBuffer.splice(0,1);
-                        }*/
-
+                        recvedBuffer.splice(0, 1);
                         break;
+
                     }
-                    else
-                    {
-                        recvedBuffer.splice(0,1);
-                        break;
+                    else {
+                        //recvedBuffer.splice(0, 1);
+                        //break;
                     }
                 }
                 //remove all prediction before this prediction
-                constructBuffer.splice(0,del+1);
+                //constructBuffer.splice(0, del + 1);
             }
 
             //player 2
@@ -502,9 +470,8 @@ function Loop() {
             //     }
             // }
         }
-        //no new game state, no compare, normal loop
-        else
-        {
+            //no new game state, no compare, normal loop
+        else {
             //control() takes input and update clientGameState
             game.control();
             //draw() render clientGameState
@@ -525,22 +492,20 @@ function Loop() {
 
 //input
 //bind(): tell the callback that "this" actually points to our KeyListener isntance(this3)
-function KeyListener () {
+function KeyListener() {
     this.pressedKeys = [];
-    this.keydown = function (e) { this.pressedKeys[e.keyCode] = true;};
-    this.keyup = function(e){this.pressedKeys[e.keyCode] = false;};
+    this.keydown = function (e) { this.pressedKeys[e.keyCode] = true; };
+    this.keyup = function (e) { this.pressedKeys[e.keyCode] = false; };
     document.addEventListener("keydown", this.keydown.bind(this));
     document.addEventListener("keyup", this.keyup.bind(this));
 }
 
-KeyListener.prototype.isPressed = function (key)
-{
+KeyListener.prototype.isPressed = function (key) {
     return this.pressedKeys[key] ? true : false;
 }
 
-KeyListener.prototype.addKeyPressListener = function (key)
-{
-    docuemtn.addKeyPressListener("keypress", function(e){
+KeyListener.prototype.addKeyPressListener = function (key) {
+    docuemtn.addKeyPressListener("keypress", function (e) {
         if (e.keyCode == keyCode)
             callback(e);
     })
