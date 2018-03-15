@@ -18,7 +18,7 @@ using namespace std::chrono;
 //time interval
 // #define INTERVAL_MS 1
 // int interval_clocks = CLOCKS_PER_SEC * INTERVAL_MS / 1000;
-int interval_clocks = CLOCKS_PER_SEC * 1 / 60;
+int interval_clocks = CLOCKS_PER_SEC * 1 / 1000;
 
 
 //received latency
@@ -53,7 +53,6 @@ void calculateLatency(int type) {
 
 //user count
 int user;
-int _i;
 
 //somthing
 int from_side = 20;
@@ -221,15 +220,15 @@ void periodicHandler() {
 			&& receivedBuffer.front().first.substr(receivedBuffer.front().first.find(":")+1) == "init")
 		{
 			++user;
-			_i = receivedBuffer.front().first.find(":");
+			int _i = receivedBuffer.front().first.find(":");
 			string userID = receivedBuffer.front().first.substr(0,_i);
 			if (user == 1)
 			{
 				player1.id = userID;
 				//for developing only
-				player2.id = userID;
-				player3.id = userID;
-				player4.id = userID;
+				player2.id = "playerTwo";
+				player3.id = "playerThree";
+				player4.id = "playerFour";
 			 	gameOn = true;
 			 	os << "init";
 				calculateLatency(latencyType);
@@ -262,9 +261,9 @@ void periodicHandler() {
 		{
 			if (receivedBuffer[i].second <=now) {
 				if (receivedBuffer.front().first.substr(receivedBuffer.front().first.find(":") + 1) == "moveL") {
-					_i = receivedBuffer[i].first.find(":");
 					int _j = receivedBuffer[i].first.find("_");
-					string userID = receivedBuffer[i].first.substr(_j+1, _i-2);
+					int _i = receivedBuffer[i].first.find(":");
+					string userID = receivedBuffer[i].first.substr(_j+1, _i-_j-1);
 					string seqNumber = receivedBuffer[i].first.substr(0, _j);
 
 					// cout << userID << endl;
@@ -293,9 +292,9 @@ void periodicHandler() {
 
 				if (receivedBuffer.front().first.substr(receivedBuffer.front().first.find(":") + 1) == "moveR")
 				{
-					_i = receivedBuffer[i].first.find(":");
 					int _j = receivedBuffer[i].first.find("_");
-					string userID = receivedBuffer[i].first.substr(_j+1, _i-2);
+					int _i = receivedBuffer[i].first.find(":");
+					string userID = receivedBuffer[i].first.substr(_j+1, _i-_j-1);
 					string seqNumber = receivedBuffer[i].first.substr(0, _j);
 
 					if (userID == player1.id)

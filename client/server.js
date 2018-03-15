@@ -6,7 +6,7 @@ var Server;
 var instr;
 var constructBuffer = [];
 var recvedBuffer = [];
-var seq = 0;
+var seq = 1;
 var gameOn = 0;
 var identity;
 
@@ -255,21 +255,37 @@ Game.prototype.control = function ()
     if (this.keys.isPressed(68)){
         //move paddle to right 1 unit
         //predict clientGameState
+        
         if (identity == this.score1.userID)
         {
-            this.p1.x += 4;
+            log("before: " + this.p1.x);
+            if ( this.wdith - this.p1.width < this.p1.x + 4)
+            {
+                this.p1.x = this.wdith - this.p1.width;
+            }
+            else
+            {
+                this.p1.x = this.p1.x + 4;
+            }
+            // this.p1.x = Math.min(this.wdith - this.p1.width, this.p1.x + 4);
+            // this.p1.x = Math.max(0, this.p1.x - 4);
+            log("after: " + this.p1.x);
+            // this.p1.x += 4;
         }
         else if (identity == this.score2.userID)
         {
-            this.p2.x += 4;
+            this.p2.x = Math.min(this.wdith - this.p2.width, this.p2.x+4);
+            // this.p2.x += 4;
         }
         else if (identity == this.score3.userID)
         {
-            this.p3.y +=4;
+            this.p3.y = Math.min(this.height - this.p3.height, this.p3.y+4);
+            // this.p3.y +=4;
         }
-        else 
+        else if (identity == this.score4.userID)
         {
-            this.p4.y -= 4;
+            this.p4.y = math.max(0, this.p4.y - 4);
+            // this.p4.y -= 4;
         }
         
         //store predicted clientGameState for later comparison
@@ -290,19 +306,23 @@ Game.prototype.control = function ()
         //predict clientGameState
         if (identity == this.score1.userID)
         {
-            this.p1.x -= 4;
+            this.p1.x = Math.max(0, this.p1.x - 4);
+            // this.p1.x -= 4;
         }
         else if (identity == this.score2.userID)
         {
-            this.p2.x -= 4;
+            this.p2.x = Math.max(0, this.p2.x - 4);
+            // this.p2.x -= 4;
         }
         else if (identity == this.score3.userID)
         {
-            this.p3.y -=4;
+            this.p3.y = Math.max(0, this.p3.y - 4);
+            // this.p3.y -=4;
         }
-        else 
+        else if (identity == this.score4.userID)
         {
-            this.p4.y += 4;
+            this.p4.y = Math.min(this.height - this.p4.height, this.p4.y+4);
+            // this.p4.y += 4;
         }
 
         //store predicted clientGameState for later comparison
@@ -366,36 +386,63 @@ function beginLoop() {
 function Loop() {
     if (gameOn == 1)
     {
+        //control() takes input and update clientGameState
+        game.control();
+        //draw() render clientGameState
+        game.draw();
+
         //received serverGameState
         if (recvedBuffer.length != 0)
         {
             log("serverGameState: " + recvedBuffer[0]);
             var s = recvedBuffer[0].split("_");
+            game.ball.x = Number(s[0]);
+            game.ball.y = s[1];
+        
+            // game.p1.x = s[2];
+            // game.p1.y = s[3];
+            game.score1.value = Number(s[4]);
+
+            game.p2.x = s[5];
+            game.p3.y = s[6];
+            game.score2.value = Number(s[7]);
+
+            game.p3.x = s[8];
+            game.p3.y = s[9];
+            game.score3.value = Number(s[10]);
+
+            game.p4.x = s[11];
+            game.p4.y = s[12];
+            game.score4.value = Number(s[13]);
+
+            game.score1.userID = s[14];
+            game.score2.userID = s[15];
+            game.score3.userID = s[16];
+            game.score4.userID = s[17];
+            
             //player 1
             if (identity == s[14] && constructBuffer.length > 0)
             {
-                log ("it's player 1");
+                log ("I'm player 1");
+                
                 var del; 
-                log("serverGameState: " + recvedBuffer[0]);
                 for (var i=0; i<constructBuffer.length; ++i)
                 {
                     //the predicted clientGameState to compare
-                    log("in "+i);
                     var gs = constructBuffer[i];
                     //check seq
-                    log("serverGameState: " + recvedBuffer[0]);
                     if (gs[5][0] == s[18])
                     {
-                        log("serverGameState: " + recvedBuffer[0]);
+                        log ("seq: "+s[18]);
+                        log("correct serverGameState: " + recvedBuffer[0]);
+                        log ("the clientGameState: " + gs[1]);
+                        
                         del = i;
-                        log ("find the seq");
                         //preicted clientGameState != serverGameState
                         //re-render
-                        log("serverGameState: " + recvedBuffer[0]);
                         if (gs[1][0].toString() !=  s[2])
                         {
-                            log ("not correct rendering");
-                            log("serverGameState: " + recvedBuffer[0]);
+                            log ("Incorrect Render: " + gs[1][0].toString() + " - " + s[2]);
                             game.update(recvedBuffer[0]);
                             game.draw();
                         }
@@ -408,14 +455,14 @@ function Loop() {
 
                         break;
                     }
-                    else
-                    {
-                        recvedBuffer.splice(0,1);
-                        break;
-                    }
                 }
+                
                 //remove all prediction before this prediction
                 constructBuffer.splice(0,del+1);
+            }
+            if (recvedBuffer.length > 0)
+            {
+                recvedBuffer.splice(0,1);
             }
 
             //player 2
@@ -502,14 +549,6 @@ function Loop() {
             //     }
             // }
         }
-        //no new game state, no compare, normal loop
-        else
-        {
-            //control() takes input and update clientGameState
-            game.control();
-            //draw() render clientGameState
-            game.draw();
-        }
     }
     requestAnimationFrame(Loop);
 
@@ -527,8 +566,12 @@ function Loop() {
 //bind(): tell the callback that "this" actually points to our KeyListener isntance(this3)
 function KeyListener () {
     this.pressedKeys = [];
-    this.keydown = function (e) { this.pressedKeys[e.keyCode] = true;};
-    this.keyup = function(e){this.pressedKeys[e.keyCode] = false;};
+    this.keydown = function (e) { 
+        this.pressedKeys[e.keyCode] = true; 
+    };
+    this.keyup = function(e){ 
+        this.pressedKeys[e.keyCode] = false; 
+    };
     document.addEventListener("keydown", this.keydown.bind(this));
     document.addEventListener("keyup", this.keyup.bind(this));
 }
