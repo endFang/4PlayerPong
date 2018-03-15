@@ -222,22 +222,22 @@ Game.prototype.update = function (payload)
         var input = payload;
         var s = payload.split("_");
         
-        this.ball.x = s[0];
-        this.ball.y = s[1];
+        this.ball.x = Number(s[0]);
+        this.ball.y = Number(s[1]);
         
         this.p1.x = Number(s[2]);
-        this.p1.y = s[3];
+        this.p1.y = Number(s[3]);
         this.score1.value = Number(s[4]);
 
         this.p2.x = Number(s[5]);
-        this.p3.y = s[6];
+        this.p3.y = Number(s[6]);
         this.score2.value = Number(s[7]);
 
-        this.p3.x = s[8];
+        this.p3.x = Number(s[8]);
         this.p3.y = Number(s[9]);
         this.score3.value = Number(s[10]);
 
-        this.p4.x = s[11];
+        this.p4.x = Number(s[11]);
         this.p4.y = Number(s[12]);
         this.score4.value = Number(s[13]);
 
@@ -256,27 +256,9 @@ Game.prototype.control = function ()
         
         if (identity == this.score1.userID)
         {
-            // log(typeof(this.width));
-            // log(this.width);
-            
-            // log(typeof(this.height));
-            // log(this.height);
-            
-            // log(typeof(this.p1.width));
-            // log(this.p1.width);
-
-            // log(typeof(this.width-this.p1.with));
             var tmp = this.width - this.p1.width;
-            // log (tmp);
-            // log((parseInt(this.width) - this.p1.with));
-
-            
-            // log("before: " + this.p1.x);
-            var tmp2 = this.p1.x + 4
-            // log("temp2: " + tmp2);
+            var tmp2 = this.p1.x + 4;
             this.p1.x = Math.min(tmp, tmp2);
-            // this.p1.x = Math.max(0, this.p1.x - 4);
-            // log("after: " + this.p1.x);
         }
         else if (identity == this.score2.userID)
         {
@@ -286,23 +268,16 @@ Game.prototype.control = function ()
         }
         else if (identity == this.score3.userID)
         {
-            // if ( this.wdith - this.p1.width < this.p3.x + 4)
-            // {
-            //     this.p3.x = this.wdith - this.p2.width;
-            // }
-            // else
-            // {
-            //     this.p3.x = this.p3.x + 4;
-            // }
             var tmp = this.height - this.p3.height;
             var tmp2 = this.p3.y + 4;
             this.p3.y = Math.min(tmp, tmp2);
         }
         else if (identity == this.score4.userID)
         {
+            log ("old p4 pos: " + this.p4.y);
             var tmp = this.p4.y - 4;
             this.p4.y = Math.max(0, tmp);
-            // this.p4.y -= 4;
+            log ("new p4 pos: " + this.p4.y + " seq: " + seq);
         }
         
         //store predicted clientGameState for later comparison
@@ -338,9 +313,11 @@ Game.prototype.control = function ()
         }
         else if (identity == this.score4.userID)
         {
+            log ("old p4 pos: " + this.p4.y);
             var tmp = this.height - this.p4.height;
             var tmp2 = this.p4.y + 4;
             this.p4.y = Math.min(tmp, tmp2);
+            log ("new p4 pos: " + this.p4.y + " seq: " + seq);
         }
 
         //store predicted clientGameState for later comparison
@@ -409,7 +386,8 @@ function Loop() {
         if (recvedBuffer.length != 0)
         {
             log("serverGameState: " + recvedBuffer[0]);
-            log ("current p1.x: " + game.p1.x + " seq: " + seq);
+            // log ("current p1.x: " + game.p1.x + " seq: " + seq);
+            log ("current p4.y: " + game.p4.y + " seq: " + seq);
             var s = recvedBuffer[0].split("_");
             game.ball.x = Number(s[0]);
             game.ball.y = s[1];
@@ -446,12 +424,10 @@ function Loop() {
                     //check seq
                     if (gs[5][0] == s[18])
                     {
-                        log ("find seq")
                         del = i;
                         //preicted clientGameState != serverGameState -> re-render
                         if (gs[1][0].toString() !=  s[2])
                         {
-                            log ("incorrect render");
                             game.update(recvedBuffer[0]);
                             game.draw();
                         }
@@ -505,7 +481,7 @@ function Loop() {
                     {
                         del = i;
                         //preicted clientGameState != serverGameState -> re-re der
-                        if (gs[3][0].toString() !=  s[9])
+                        if (gs[3][1].toString() !=  s[9])
                         {
                             game.update(recvedBuffer[0]);
                             game.draw();
@@ -529,10 +505,12 @@ function Loop() {
                     //check seq
                     if (gs[5][0] == s[21])
                     {
+                        log ("find seq: " + s[21]);
                         del = i;
                         //preicted clientGameState != serverGameState -> re-render
-                        if (gs[4][0].toString() !=  s[12])
+                        if (gs[4][1].toString() !=  s[12])
                         {
+                            log ("incorrect render");
                             game.update(recvedBuffer[0]);
                             game.draw();
                         }
