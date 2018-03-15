@@ -259,7 +259,7 @@ Game.prototype.control = function ()
         
         if (identity == this.score1.userID)
         {
-            log("before: " + this.p1.x);
+            // log("before: " + this.p1.x);
             if ( this.wdith - this.p1.width < this.p1.x + 4)
             {
                 this.p1.x = this.wdith - this.p1.width;
@@ -270,12 +270,20 @@ Game.prototype.control = function ()
             }
             // this.p1.x = Math.min(this.wdith - this.p1.width, this.p1.x + 4);
             // this.p1.x = Math.max(0, this.p1.x - 4);
-            log("after: " + this.p1.x);
+            // log("after: " + this.p1.x);
             // this.p1.x += 4;
         }
         else if (identity == this.score2.userID)
         {
-            this.p2.x = Math.min(this.wdith - this.p2.width, this.p2.x+4);
+            if ( this.wdith - this.p1.width < this.p2.x + 4)
+            {
+                this.p2.x = this.wdith - this.p2.width;
+            }
+            else
+            {
+                this.p2.x = this.p2.x + 4;
+            }
+            // this.p2.x = Math.min(this.wdith - this.p2.width, this.p2.x+4);
             // this.p2.x += 4;
         }
         else if (identity == this.score3.userID)
@@ -285,7 +293,7 @@ Game.prototype.control = function ()
         }
         else if (identity == this.score4.userID)
         {
-            this.p4.y = math.max(0, this.p4.y - 4);
+            this.p4.y = Math.max(0, this.p4.y - 4);
             // this.p4.y -= 4;
         }
         
@@ -395,7 +403,7 @@ function Loop() {
         //received serverGameState
         if (recvedBuffer.length != 0)
         {
-            log("serverGameState: " + recvedBuffer[0]);
+            // log("serverGameState: " + recvedBuffer[0]);
             var s = recvedBuffer[0].split("_");
             game.ball.x = Number(s[0]);
             game.ball.y = s[1];
@@ -424,8 +432,6 @@ function Loop() {
             //player 1
             if (identity == s[14] && constructBuffer.length > 0)
             {
-                log ("I'm player 1");
-                
                 var del; 
                 for (var i=0; i<constructBuffer.length; ++i)
                 {
@@ -434,16 +440,12 @@ function Loop() {
                     //check seq
                     if (gs[5][0] == s[18])
                     {
-                        log ("seq: "+s[18]);
-                        log("correct serverGameState: " + recvedBuffer[0]);
-                        log ("the clientGameState: " + gs[1]);
                         
                         del = i;
                         //preicted clientGameState != serverGameState
                         //re-render
                         if (gs[1][0].toString() !=  s[2])
                         {
-                            log ("Incorrect Render: " + gs[1][0].toString() + " - " + s[2]);
                             game.update(recvedBuffer[0]);
                             game.draw();
                         }
@@ -460,8 +462,6 @@ function Loop() {
             // player 2
             else if (identity == s[15])
             {
-                log ("I'm player 2");
-                
                 var del; 
                 for (var i=0; i<constructBuffer.length; ++i)
                 {
@@ -470,16 +470,12 @@ function Loop() {
                     //check seq
                     if (gs[5][0] == s[19])
                     {
-                        log ("seq: "+s[19]);
-                        log("correct serverGameState: " + recvedBuffer[0]);
-                        log ("the clientGameState: " + gs[1]);
                         
                         del = i;
                         //preicted clientGameState != serverGameState
                         //re-render
                         if (gs[2][0].toString() !=  s[5])
                         {
-                            log ("Incorrect Render: " + gs[2][0].toString() + " - " + s[5]);
                             game.update(recvedBuffer[0]);
                             game.draw();
                         }
@@ -495,8 +491,6 @@ function Loop() {
             //player 3
             else if (identity == s[16])
             {
-                log ("I'm player 3");
-                
                 var del; 
                 for (var i=0; i<constructBuffer.length; ++i)
                 {
@@ -505,15 +499,11 @@ function Loop() {
                     //check seq
                     if (gs[5][0] == s[20])
                     {
-                        log ("seq: "+s[19]);
-                        log("correct serverGameState: " + recvedBuffer[0]);
-                        log ("the clientGameState: " + gs[1]);  
                         del = i;
                         //preicted clientGameState != serverGameState
                         //re-render
                         if (gs[3][0].toString() !=  s[9])
                         {
-                            log ("Incorrect Render: " + gs[2][0].toString() + " - " + s[5]);
                             game.update(recvedBuffer[0]);
                             game.draw();
                         }
@@ -528,8 +518,6 @@ function Loop() {
             //player 4
             else if (identity == s[17])
             {
-                log ("I'm player 3");
-                
                 var del; 
                 for (var i=0; i<constructBuffer.length; ++i)
                 {
@@ -538,15 +526,11 @@ function Loop() {
                     //check seq
                     if (gs[5][0] == s[21])
                     {
-                        log ("seq: "+s[19]);
-                        log("correct serverGameState: " + recvedBuffer[0]);
-                        log ("the clientGameState: " + gs[1]);  
                         del = i;
                         //preicted clientGameState != serverGameState
                         //re-render
                         if (gs[4][0].toString() !=  s[12])
                         {
-                            log ("Incorrect Render: " + gs[2][0].toString() + " - " + s[5]);
                             game.update(recvedBuffer[0]);
                             game.draw();
                         }
