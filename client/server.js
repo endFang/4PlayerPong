@@ -3,12 +3,13 @@
 //====================================
 
 var Server;
-var instr;
-var constructBuffer = [];
-var recvedBuffer = [];
+var identity;
 var seq = 1;
 var gameOn = 0;
-var identity;
+var posCalc;
+
+var constructBuffer = [];
+var recvedBuffer = [];
 
 $( "#start" ).click(function() {
     $(this).attr("disabled", "disabled");
@@ -33,7 +34,6 @@ function send( text ) {
 }
 
 function connect(){
-    
     log('Connecting...');
     Server = new FancyWebSocket('ws://' + document.getElementById('ip').value + ':' + document.getElementById('port').value);
 
@@ -60,19 +60,21 @@ function connect(){
 
     //Log any messages sent from server
     Server.bind('message', function( payload ) {
-        log (payload);
-        //m3 printing 
+        // log (payload);
+        
+        // Legacy: m3 timestamp print, may result browser crash 
         // log("server sends message:" + payload);
         // var milliseconds = (new Date).getTime();
         // log ("client received at: " + milliseconds);
         
-        //initial gameState
+        //initial clientGameState
         if (payload.trim() === "init")
         {
             gameOn = 1;
             idnetity = document.getElementById("userid").value;
             beginLoop();
         }
+
         //quit game
         else if (payload.trim() === "quit")
         {
@@ -81,12 +83,10 @@ function connect(){
             disconnect();
             game.quit();
         }
-        //receive new gameState
+        //receive new serverGameState
         else
         {
-            //receive a new game state, 
             recvedBuffer.push(payload);
-            // Loop(payload);
         }
     });
 
@@ -112,10 +112,8 @@ function quitGame() {
 
 
 
-
-
 //========================================
-//               Pong Code
+//               Pong
 //========================================
 
 //====================
@@ -139,11 +137,10 @@ Ball.prototype.draw = function (p)
 //       Paddle
 //====================
 function Paddle (x,y,w,h) {
-    this.x = x;
-    this.y = y;
-    this.width = w;
-    this.height = h;
-    // this.score = 0;
+    this.x = Number(x);
+    this.y = Number(y);
+    this.width = Number(w);
+    this.height = Number(h);
 }
 
 Paddle.prototype.draw = function (p)
@@ -152,9 +149,9 @@ Paddle.prototype.draw = function (p)
 }
 
 
-//====================
+//================================
 //       Display for ID & Score
-//====================
+//================================
 function Display (x, y) {
     this.x = x;
     this.y = y;
@@ -169,12 +166,11 @@ Display.prototype.draw = function (p){
 }
 
 
-
 //====================
-//       Game
+//       Game State
 //====================
 function Game() {
-    //initialize gametable
+    //initialize clientGameState
     var canvas = document.getElementById("game");
     this.width = canvas.width;
     this.height = canvas.height;
@@ -195,8 +191,7 @@ function Game() {
     this.p4 = new Paddle(580, this.height/2, 5, 100);
     this.score4 = new Display(550, this.height*3/4)
 
-
-    //initailzie the ball
+    //initailzie ball
     this.ball = new Ball();
 
 }
@@ -220,6 +215,8 @@ Game.prototype.draw = function()
     this.score4.draw(this.context);
 }
 
+
+//Update clientGameState based on serverGameState
 Game.prototype.update = function (payload)
 {
         var input = payload;
@@ -228,20 +225,20 @@ Game.prototype.update = function (payload)
         this.ball.x = s[0];
         this.ball.y = s[1];
         
-        this.p1.x = s[2];
+        this.p1.x = Number(s[2]);
         this.p1.y = s[3];
         this.score1.value = Number(s[4]);
 
-        this.p2.x = s[5];
+        this.p2.x = Number(s[5]);
         this.p3.y = s[6];
         this.score2.value = Number(s[7]);
 
         this.p3.x = s[8];
-        this.p3.y = s[9];
+        this.p3.y = Number(s[9]);
         this.score3.value = Number(s[10]);
 
         this.p4.x = s[11];
-        this.p4.y = s[12];
+        this.p4.y = Number(s[12]);
         this.score4.value = Number(s[13]);
 
         this.score1.userID = s[14];
@@ -259,41 +256,52 @@ Game.prototype.control = function ()
         
         if (identity == this.score1.userID)
         {
+            // log(typeof(this.width));
+            // log(this.width);
+            
+            // log(typeof(this.height));
+            // log(this.height);
+            
+            // log(typeof(this.p1.width));
+            // log(this.p1.width);
+
+            // log(typeof(this.width-this.p1.with));
+            var tmp = this.width - this.p1.width;
+            // log (tmp);
+            // log((parseInt(this.width) - this.p1.with));
+
+            
             // log("before: " + this.p1.x);
-            if ( this.wdith - this.p1.width < this.p1.x + 4)
-            {
-                this.p1.x = this.wdith - this.p1.width;
-            }
-            else
-            {
-                this.p1.x = this.p1.x + 4;
-            }
-            // this.p1.x = Math.min(this.wdith - this.p1.width, this.p1.x + 4);
+            var tmp2 = this.p1.x + 4
+            // log("temp2: " + tmp2);
+            this.p1.x = Math.min(tmp, tmp2);
             // this.p1.x = Math.max(0, this.p1.x - 4);
             // log("after: " + this.p1.x);
-            // this.p1.x += 4;
         }
         else if (identity == this.score2.userID)
         {
-            if ( this.wdith - this.p1.width < this.p2.x + 4)
-            {
-                this.p2.x = this.wdith - this.p2.width;
-            }
-            else
-            {
-                this.p2.x = this.p2.x + 4;
-            }
-            // this.p2.x = Math.min(this.wdith - this.p2.width, this.p2.x+4);
-            // this.p2.x += 4;
+            var tmp = this.width - this.p2.width;
+            var tmp2 = this.p2.x + 4;
+            this.p2.x = Math.min(tmp, tmp2);
         }
         else if (identity == this.score3.userID)
         {
-            this.p3.y = Math.min(this.height - this.p3.height, this.p3.y+4);
-            // this.p3.y +=4;
+            // if ( this.wdith - this.p1.width < this.p3.x + 4)
+            // {
+            //     this.p3.x = this.wdith - this.p2.width;
+            // }
+            // else
+            // {
+            //     this.p3.x = this.p3.x + 4;
+            // }
+            var tmp = this.height - this.p3.height;
+            var tmp2 = this.p3.y + 4;
+            this.p3.y = Math.min(tmp, tmp2);
         }
         else if (identity == this.score4.userID)
         {
-            this.p4.y = Math.max(0, this.p4.y - 4);
+            var tmp = this.p4.y - 4;
+            this.p4.y = Math.max(0, tmp);
             // this.p4.y -= 4;
         }
         
@@ -315,23 +323,24 @@ Game.prototype.control = function ()
         //predict clientGameState
         if (identity == this.score1.userID)
         {
-            this.p1.x = Math.max(0, this.p1.x - 4);
-            // this.p1.x -= 4;
+            var tmp = this.p1.x - 4;
+            this.p1.x = Math.max(0, tmp);
         }
         else if (identity == this.score2.userID)
         {
-            this.p2.x = Math.max(0, this.p2.x - 4);
-            // this.p2.x -= 4;
+            var tmp = this.p2.x - 4;
+            this.p2.x = Math.max(0, tmp);
         }
         else if (identity == this.score3.userID)
         {
-            this.p3.y = Math.max(0, this.p3.y - 4);
-            // this.p3.y -=4;
+            var tmp = this.p3.y - 4;
+            this.p3.y = Math.max(0, tmp);
         }
         else if (identity == this.score4.userID)
         {
-            this.p4.y = Math.min(this.height - this.p4.height, this.p4.y+4);
-            // this.p4.y += 4;
+            var tmp = this.height - this.p4.height;
+            var tmp2 = this.p4.y + 4;
+            this.p4.y = Math.min(tmp, tmp2);
         }
 
         //store predicted clientGameState for later comparison
@@ -359,11 +368,7 @@ Game.prototype.quit = function()
 //==============================
 //         Game Loop
 //==============================
-
-
 var game = new Game();
-
-
 
 //draw the initial clientGameState
 function beginLoop() {
@@ -377,7 +382,7 @@ function beginLoop() {
 
 
 //=====================================================
-//                  payload index table
+//                  payload index 
 //  index 0, 1            |           ball x, y
 //  index 2, 3            |           p1 x, y
 //  index 4               |           p1 score
@@ -391,19 +396,20 @@ function beginLoop() {
 //  index 18, 19, 20, 21  |           seq for p1, p2, p3, p4
 //=====================================================
 
-//take input, update clientGameState, render clientGameState
+//Main game loop
 function Loop() {
     if (gameOn == 1)
     {
-        //control() takes input and update clientGameState
+        //takes input and update clientGameState
         game.control();
-        //draw() render clientGameState
+        //render clientGameState
         game.draw();
 
         //received serverGameState
         if (recvedBuffer.length != 0)
         {
-            // log("serverGameState: " + recvedBuffer[0]);
+            log("serverGameState: " + recvedBuffer[0]);
+            log ("current p1.x: " + game.p1.x + " seq: " + seq);
             var s = recvedBuffer[0].split("_");
             game.ball.x = Number(s[0]);
             game.ball.y = s[1];
@@ -440,12 +446,12 @@ function Loop() {
                     //check seq
                     if (gs[5][0] == s[18])
                     {
-                        
+                        log ("find seq")
                         del = i;
-                        //preicted clientGameState != serverGameState
-                        //re-render
+                        //preicted clientGameState != serverGameState -> re-render
                         if (gs[1][0].toString() !=  s[2])
                         {
+                            log ("incorrect render");
                             game.update(recvedBuffer[0]);
                             game.draw();
                         }
@@ -458,7 +464,6 @@ function Loop() {
                 constructBuffer.splice(0,del+1);
             }
             
-
             // player 2
             else if (identity == s[15])
             {
@@ -472,8 +477,7 @@ function Loop() {
                     {
                         
                         del = i;
-                        //preicted clientGameState != serverGameState
-                        //re-render
+                        //preicted clientGameState != serverGameState -> re-render
                         if (gs[2][0].toString() !=  s[5])
                         {
                             game.update(recvedBuffer[0]);
@@ -500,8 +504,7 @@ function Loop() {
                     if (gs[5][0] == s[20])
                     {
                         del = i;
-                        //preicted clientGameState != serverGameState
-                        //re-render
+                        //preicted clientGameState != serverGameState -> re-re der
                         if (gs[3][0].toString() !=  s[9])
                         {
                             game.update(recvedBuffer[0]);
@@ -527,8 +530,7 @@ function Loop() {
                     if (gs[5][0] == s[21])
                     {
                         del = i;
-                        //preicted clientGameState != serverGameState
-                        //re-render
+                        //preicted clientGameState != serverGameState -> re-render
                         if (gs[4][0].toString() !=  s[12])
                         {
                             game.update(recvedBuffer[0]);
@@ -541,6 +543,8 @@ function Loop() {
                 //remove all prediction before this prediction
                 constructBuffer.splice(0,del+1);
             }
+
+            //remove the first serverGameState in buffer, b/c client already comfirmed it
             if (recvedBuffer.length > 0)
             {
                 recvedBuffer.splice(0,1);
@@ -549,6 +553,8 @@ function Loop() {
     }
     requestAnimationFrame(Loop);
 
+
+    //legacy code before m4
     // if (gameOn == 1)
     // {
     //     game.control();
@@ -584,4 +590,51 @@ KeyListener.prototype.addKeyPressListener = function (key)
         if (e.keyCode == keyCode)
             callback(e);
     })
+}
+
+
+
+//======================
+//      Alex Function
+//======================
+
+function getNextState(s1, s2) {
+    var sp1 = s1.split("_");
+    var s1x = sp1[0];
+    var s1y = sp1[1];
+
+    var sp2 = s2.split("_");
+    var s2x = sp2[0];
+    var s2y = sp2[1];
+
+    var ydiff = s2y - s1y;
+    var xdiff = s2x - s1x;
+    var ynew = s2y + ydiff;
+    var xnew = s2x + xdiff;
+    
+    if (ynew < 0) {
+        ynew = -ynew;
+    }
+    //replace with canvas sizes instead of numbers
+    else if(ynew>500){
+        ynew = -(500 - ynew);
+    }
+
+    if (xnew < 0) {
+        xnew = -xnew;
+    }
+    //replace with canvase size instead of numbers
+    else if (xnew > 600) {
+        xnew = -(600 - xnew);
+    }
+
+    var s3 = xnew + "_" + ynew;
+    for (var i = 2; i < 18; i++)
+    {
+        s3 += "_" + sp2[i];
+    }
+    return s3;
+
+    //if want to return just the ball predicted location, would be just xnew and ynew
+
 }
