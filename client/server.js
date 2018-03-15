@@ -60,6 +60,7 @@ function connect(){
 
     //Log any messages sent from server
     Server.bind('message', function( payload ) {
+        log (payload);
         //m3 printing 
         // log("server sends message:" + payload);
         // var milliseconds = (new Date).getTime();
@@ -403,16 +404,16 @@ function Loop() {
             // game.p1.y = s[3];
             game.score1.value = Number(s[4]);
 
-            game.p2.x = s[5];
-            game.p3.y = s[6];
+            // game.p2.x = s[5];
+            // game.p3.y = s[6];
             game.score2.value = Number(s[7]);
 
-            game.p3.x = s[8];
-            game.p3.y = s[9];
+            // game.p3.x = s[8];
+            // game.p3.y = s[9];
             game.score3.value = Number(s[10]);
 
-            game.p4.x = s[11];
-            game.p4.y = s[12];
+            // game.p4.x = s[11];
+            // game.p4.y = s[12];
             game.score4.value = Number(s[13]);
 
             game.score1.userID = s[14];
@@ -447,12 +448,6 @@ function Loop() {
                             game.draw();
                         }
                         recvedBuffer.splice(0,1);
-
-                        /*for (var j=0; j<=i; ++j)
-                        {
-                            constructBuffer.splice(0,1);
-                        }*/
-
                         break;
                     }
                 }
@@ -460,94 +455,112 @@ function Loop() {
                 //remove all prediction before this prediction
                 constructBuffer.splice(0,del+1);
             }
+            
+
+            // player 2
+            else if (identity == s[15])
+            {
+                log ("I'm player 2");
+                
+                var del; 
+                for (var i=0; i<constructBuffer.length; ++i)
+                {
+                    //the predicted clientGameState to compare
+                    var gs = constructBuffer[i];
+                    //check seq
+                    if (gs[5][0] == s[19])
+                    {
+                        log ("seq: "+s[19]);
+                        log("correct serverGameState: " + recvedBuffer[0]);
+                        log ("the clientGameState: " + gs[1]);
+                        
+                        del = i;
+                        //preicted clientGameState != serverGameState
+                        //re-render
+                        if (gs[2][0].toString() !=  s[5])
+                        {
+                            log ("Incorrect Render: " + gs[2][0].toString() + " - " + s[5]);
+                            game.update(recvedBuffer[0]);
+                            game.draw();
+                        }
+                        recvedBuffer.splice(0,1);
+                        break;
+                    }
+                }
+                
+                //remove all prediction before this prediction
+                constructBuffer.splice(0,del+1);
+            }
+
+            //player 3
+            else if (identity == s[16])
+            {
+                log ("I'm player 3");
+                
+                var del; 
+                for (var i=0; i<constructBuffer.length; ++i)
+                {
+                    //the predicted clientGameState to compare
+                    var gs = constructBuffer[i];
+                    //check seq
+                    if (gs[5][0] == s[20])
+                    {
+                        log ("seq: "+s[19]);
+                        log("correct serverGameState: " + recvedBuffer[0]);
+                        log ("the clientGameState: " + gs[1]);  
+                        del = i;
+                        //preicted clientGameState != serverGameState
+                        //re-render
+                        if (gs[3][0].toString() !=  s[9])
+                        {
+                            log ("Incorrect Render: " + gs[2][0].toString() + " - " + s[5]);
+                            game.update(recvedBuffer[0]);
+                            game.draw();
+                        }
+                        recvedBuffer.splice(0,1);
+                        break;
+                    }
+                }
+                //remove all prediction before this prediction
+                constructBuffer.splice(0,del+1);
+            }
+
+            //player 4
+            else if (identity == s[17])
+            {
+                log ("I'm player 3");
+                
+                var del; 
+                for (var i=0; i<constructBuffer.length; ++i)
+                {
+                    //the predicted clientGameState to compare
+                    var gs = constructBuffer[i];
+                    //check seq
+                    if (gs[5][0] == s[21])
+                    {
+                        log ("seq: "+s[19]);
+                        log("correct serverGameState: " + recvedBuffer[0]);
+                        log ("the clientGameState: " + gs[1]);  
+                        del = i;
+                        //preicted clientGameState != serverGameState
+                        //re-render
+                        if (gs[4][0].toString() !=  s[12])
+                        {
+                            log ("Incorrect Render: " + gs[2][0].toString() + " - " + s[5]);
+                            game.update(recvedBuffer[0]);
+                            game.draw();
+                        }
+                        recvedBuffer.splice(0,1);
+                        break;
+                    }
+                }
+                //remove all prediction before this prediction
+                constructBuffer.splice(0,del+1);
+            }
             if (recvedBuffer.length > 0)
             {
                 recvedBuffer.splice(0,1);
             }
-
-            //player 2
-            // else if (identity == s[15])
-            // {
-            //     for (var i=0; i<constructBuffer.length; ++i)
-            //     {
-            //         //the predicted clientGameState to compare
-            //         var gs = constructBuffer[i];
-            //         //check seq
-            //         if (gs[5][0] == s[19])
-            //         {
-            //             //preicted clientGameState != serverGameState
-            //             //re-render
-            //             if (gs[2][0].toString() !=  s[5])
-            //             {
-            //                 game.update(recvedBuffer[0]);
-            //                 game.draw();
-            //                 recvedBuffer.splice(0,1);
-            //             }
-
-            //             //remove all prediction before this prediction
-            //             for (var j=0; j<i; ++j)
-            //             {
-            //                 constructBuffer.splice(0,1);
-            //             }
-            //         }
-            //     }
-            // }
-
-            // //player 3
-            // else if (identity == s[16])
-            // {
-            //     for (var i=0; i<constructBuffer.length; ++i)
-            //     {
-            //         //the predicted clientGameState to compare
-            //         var gs = constructBuffer[i];
-            //         //check seq
-            //         if (gs[5][0] == s[19])
-            //         {
-            //             //preicted clientGameState != serverGameState
-            //             //re-render
-            //             if (gs[3][1].toString() !=  s[9])
-            //             {
-            //                 game.update(recvedBuffer[0]);
-            //                 game.draw();
-            //                 recvedBuffer.splice(0,1);
-            //             }
-
-            //             //remove all prediction before this prediction
-            //             for (var j=0; j<i; ++j)
-            //             {
-            //                 constructBuffer.splice(0,1);
-            //             }
-            //         }
-            //     }
-            // }
-
-            // //player 4
-            // else if (identity == s[17])
-            // {
-            //     for (var i=0; i<constructBuffer.length; ++i)
-            //     {
-            //         //the predicted clientGameState to compare
-            //         var gs = constructBuffer[i];
-            //         //check seq
-            //         if (gs[5][0] == s[19])
-            //         {
-            //             //preicted clientGameState != serverGameState
-            //             //re-render
-            //             if (gs[4][1].toString() !=  s[12])
-            //             {
-            //                 game.update(recvedBuffer[0]);
-            //                 game.draw();
-            //                 recvedBuffer.splice(0,1);
-            //             }
-
-            //             //remove all prediction before this prediction
-            //             for (var j=0; j<i; ++j)
-            //             {
-            //                 constructBuffer.splice(0,1);
-            //             }
-            //         }
-            //     }
-            // }
         }
     }
     requestAnimationFrame(Loop);

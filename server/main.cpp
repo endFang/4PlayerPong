@@ -226,26 +226,26 @@ void periodicHandler() {
 			{
 				player1.id = userID;
 				//for developing only
-				player2.id = "playerTwo";
-				player3.id = "playerThree";
-				player4.id = "playerFour";
+				// player2.id = "playerTwo";
+				// player3.id = "playerThree";
+				// player4.id = "playerFour";
+			 	// gameOn = true;
+			 	// os << "init";
+				// calculateLatency(latencyType);
+				// sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), now));
+			}
+			if (user == 2)
+			 	player2.id = userID;
+			if (user == 3)
+			 	player3.id = userID;
+			if (user == 4)
+			{
+			 	player4.id = userID;
 			 	gameOn = true;
 			 	os << "init";
-				calculateLatency(latencyType);
+			 	calculateLatency(latencyType);
 				sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), now));
 			}
-			// if (user == 2)
-			//  	player2.id = userID;
-			// if (user == 3)
-			//  	player3.id = userID;
-			// if (user == 4)
-			// {
-			//  	player4.id = userID;
-			//  	gameOn = true;
-			//  	os << "init";
-			//  	calculateLatency(latencyType);
-			// 	sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), now + slatency));
-			// }
 			// if (!receivedBuffer.empty())
 			// 	cout << receivedBuffer.front().first << endl;
 			receivedBuffer.erase(receivedBuffer.begin());
@@ -266,12 +266,10 @@ void periodicHandler() {
 					string userID = receivedBuffer[i].first.substr(_j+1, _i-_j-1);
 					string seqNumber = receivedBuffer[i].first.substr(0, _j);
 
-					// cout << userID << endl;
 					if (userID == player1.id)
 					{
 						player1.posX = fmax(0, player1.posX - player1.speed);
 						player1.seq = seqNumber;
-						//cout << seqNumber << endl;
 					}
 					else if (userID == player2.id)
 					{
@@ -326,7 +324,7 @@ void periodicHandler() {
 				{
 					os << "quit";
 					calculateLatency(latencyType);
-					sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), now + slatency));
+					sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), now));
 					gameOn = false;
 					--user;
 				}
@@ -444,7 +442,6 @@ void periodicHandler() {
 			// system_clock::now().time_since_epoch());
 			// os << to_string(ms.count()) << "_";
 
-			cout << "SERVER"<<player1.seq;
 			serverGameState << player1.seq << "_" << player2.seq << "_" << player3.seq << "_" << player4.seq;
 
 			// cout << "constructed string: " << serverGameState.str() << endl;
