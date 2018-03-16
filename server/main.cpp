@@ -22,9 +22,9 @@ int interval_clocks = CLOCKS_PER_SEC * 1 / 1000;
 
 
 //received latency
-milliseconds rlatency = milliseconds(2000);
+milliseconds rlatency = milliseconds(500);
 //send latency
-milliseconds slatency = milliseconds(2000);
+milliseconds slatency = milliseconds(500);
 
 
 //latency
@@ -471,6 +471,7 @@ void periodicHandler() {
 				for (int i = 0; i < clientIDs.size(); i++) {
 					//cout << sendBuffer[toSend].first << endl;
 					server.wsSend(clientIDs[i], sendBuffer[toSend].first);
+					cout << sendBuffer[toSend].first << endl;
 				}
 			}
 			for (int i = deletes.size() - 1; i >= 0; i--) {

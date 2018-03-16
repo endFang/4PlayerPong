@@ -5,11 +5,23 @@
 var Server;
 var identity;
 var seq = 1;
-var gameOn = 0;
+var gameOn = false;
 var posCalc;
 
+//client prediction
 var constructBuffer = [];
 var recvedBuffer = [];
+
+//interpolation
+var toInterpolate = [];
+var interpolatedBuffer = [];
+
+//fps controlling
+var stop = false;
+var now, elapsed;
+var then = 0;
+var fps = 25;
+var fpsInterval = 1000 / fps;
 
 $( "#start" ).click(function() {
     $(this).attr("disabled", "disabled");
@@ -60,7 +72,6 @@ function connect(){
 
     //Log any messages sent from server
     Server.bind('message', function( payload ) {
-        // log (payload);
         
         // Legacy: m3 timestamp print, may result browser crash 
         // log("server sends message:" + payload);
@@ -70,15 +81,13 @@ function connect(){
         //initial clientGameState
         if (payload.trim() === "init")
         {
-            gameOn = 1;
             idnetity = document.getElementById("userid").value;
-            beginLoop();
         }
 
         //quit game
         else if (payload.trim() === "quit")
         {
-            gameOn = 0;
+            gameOn = false;
             log ("Game Over");
             disconnect();
             game.quit();
@@ -87,9 +96,15 @@ function connect(){
         else
         {
             recvedBuffer.push(payload);
+            toInterpolate.push(payload);
+            var l = toInterpolate.length;
+            if (l >= 3 && !gameOn)
+            {
+                gameOn = true;
+                beginLoop();
+            }
         }
     });
-
     Server.connect();
 
 }
@@ -106,9 +121,132 @@ function startGame() {
 }
 
 function quitGame() { 
-    gameOn = 0;
+    gameOn = false;
     send(identity.value+":"+"quit"); 
 }
+
+
+
+
+//============================
+//          Interpolation
+//============================
+
+function stn(gs)
+{
+    var result = new Array();
+    var s = gs.split("_");
+    for (var i=0; i<13; ++i)
+    {
+        result.push(Number(s[i]));
+    }
+    return result;
+}
+
+// //return an array of interpolated gs
+function Interpolation(gs1, gs2)
+{
+    var s1 = stn(gs1);
+    var s2 = stn(gs2);
+    var i1 = [ s1[0], s1[1], s1[2], s1[3], s1[5], s1[6], s1[8], s1[9], s1[11], s1[12] ];
+    var i2=[], i3=[], i4=[], i5=[];
+    
+    //ball positive on X
+    if (s2[0] > s1[0])
+    {
+        i2.push(s1[0] + 1);
+        i3.push(s1[0] + 2);
+        i4.push(s1[0] + 3);
+        i5.push(s1[0] + 4);
+    }
+    else
+    {
+        i2.push(s1[0] - 1);
+        i3.push(s1[0] - 2);
+        i4.push(s1[0] - 3);
+        i5.push(s1[0] - 4);
+    }
+    
+    //ball positive on Y
+    if (s2[1] > s1[1])
+    {
+        i2.push(s1[1] + 1);
+        i3.push(s1[1] + 2);
+        i4.push(s1[1] + 3);
+        i5.push(s1[1] + 4);
+    }
+    else
+    {
+        i2.push(s1[1] - 1);
+        i3.push(s1[1] - 2);
+        i4.push(s1[1] - 3);
+        i5.push(s1[1] - 4);
+    }
+
+    // log ("calculate player position");
+    
+    for (var i = 0; i<4; ++i)
+    {
+        if (i = 0)
+            var iX = 2; //2, 5, 8, 11
+        else if (i = 1)
+            var iX = 5;
+        else if (i = 2)
+            var iX = 8;
+        else if (i = 3)
+            var iX = 11;
+        var iY = iX+1; //3, 6, 9, 12
+        var xDelta = s2[iX] - s1[iX];
+        var xAct = Math.floor(xDelta/5);
+        var yDelta = s2[iY] - s2[iY];
+        var yAct = Math.floor(yDelta/5);
+        
+        if (xDelta >= 0)
+        {
+            i2.push(s1[iX] + xDelta);
+            i3.push(s1[iX] + 2*xDelta);
+            i4.push(s1[iX] + 3*xDelta);
+            i5.push(s1[iX] + 4*xDelta);
+        }
+        else
+        {
+            i2.push(s1[iX] - xDelta);
+            i3.push(s1[iX] - 2*xDelta);
+            i4.push(s1[iX] - 3*xDelta);
+            i5.push(s1[iX] - 4*xDelta);
+        }
+        
+        if (yDelta >= 0)
+        {
+            i2.push(s1[iY] + yAct);
+            i3.push(s1[iY] + 2*yAct);
+            i4.push(s1[iY] + 3*yAct);
+            i5.push(s1[iY] + 4*yAct);
+        }
+        else
+        {
+            i2.push(s1[iY] - yAct);
+            i3.push(s1[iY] - 2*yAct);
+            i4.push(s1[iY] - 3*yAct);
+            i5.push(s1[iY] - 4*yAct);
+        }
+    }
+    
+    var i6 = [ s2[0], s2[1], s2[2], s2[3], s2[5], s2[6], s2[8], s2[9], s2[11], s2[12] ];
+    
+    var result = new Array();
+    result.push(i1);
+    result.push(i2);
+    result.push(i3);
+    result.push(i4);
+    result.push(i5);
+    result.push(i6);
+
+    log (result);
+    
+    return result;
+}
+
 
 
 
@@ -247,6 +385,40 @@ Game.prototype.update = function (payload)
         this.score4.userID = s[17];
 }
 
+Game.prototype.iupdate = function (iGS)
+{
+    log ("iGS: " + iGS);
+        
+        this.ball.x = Number(iGS[0]);
+        this.ball.y = Number(iGS[1]);
+
+        
+        if (identity != this.p1.userID)
+        {
+            this.p1.x = Number(iGS[2]);
+            this.p1.y = Number(iGS[3]);
+        }
+        
+        if (identity != this.p2.userID)
+        {
+            this.p2.x = Number(iGS[4]);
+            this.p3.y = Number(iGS[5]);
+        }
+            
+        if (identity != this.p3.userID)
+        {
+            this.p3.x = Number(iGS[6]);
+            this.p3.y = Number(iGS[7]);
+        }
+        
+        if (identity != this.p4.userID)
+        {
+            this.p4.x = Number(iGS[8]);
+            this.p4.y = Number(iGS[9]);
+        }
+        
+}
+
 
 Game.prototype.control = function ()
 {
@@ -274,10 +446,8 @@ Game.prototype.control = function ()
         }
         else if (identity == this.score4.userID)
         {
-            log ("old p4 pos: " + this.p4.y);
             var tmp = this.p4.y - 4;
             this.p4.y = Math.max(0, tmp);
-            log ("new p4 pos: " + this.p4.y + " seq: " + seq);
         }
         
         //store predicted clientGameState for later comparison
@@ -313,11 +483,9 @@ Game.prototype.control = function ()
         }
         else if (identity == this.score4.userID)
         {
-            log ("old p4 pos: " + this.p4.y);
             var tmp = this.height - this.p4.height;
             var tmp2 = this.p4.y + 4;
             this.p4.y = Math.min(tmp, tmp2);
-            log ("new p4 pos: " + this.p4.y + " seq: " + seq);
         }
 
         //store predicted clientGameState for later comparison
@@ -349,7 +517,7 @@ var game = new Game();
 
 //draw the initial clientGameState
 function beginLoop() {
-    if (gameOn == 1)
+    if (gameOn)
     {
         game.draw();
     }
@@ -375,22 +543,52 @@ function beginLoop() {
 
 //Main game loop
 function Loop() {
-    if (gameOn == 1)
+    if (toInterpolate.length >= 2)
     {
-        //takes input and update clientGameState
+        var gs1 = toInterpolate[0], gs2 = toInterpolate[1];
+        var renderGS = new Array();
+        renderGS = Interpolation(gs1, gs2);
+        for (var i=0; i<renderGS.length; ++i)
+        {
+            // log ("inside renderGS: " + i + " " + renderGS[i]);
+            var tmp = renderGS[i];
+            interpolatedBuffer.push(tmp);
+        }
+        // interpolatedBuffer.push(renderGS);
+
+        // for (var i=0; i<interpolatedBuffer.length; ++i)
+        // {
+        //     log ("interpolate: " + i + " " + interpolatedBuffer[i]);
+        // }
+        
+        toInterpolate.splice(0,2);
+    }
+
+    // log ("oustside interpolation");
+    now = Date.now();
+    elapsed = now - then;
+
+    if (gameOn && elapsed > fpsInterval)
+    {
+        then = now - (elapsed % fpsInterval);
+        //input -> update -> render
         game.control();
-        //render clientGameState
         game.draw();
+        
+        //render 1 gs from InterpolationBuffer and discard it
+        if (interpolatedBuffer.length >= 1)
+        {
+            game.iupdate(interpolatedBuffer[0]);
+            game.draw();
+            interpolatedBuffer.splice(0, 1);
+        }
 
         //received serverGameState
         if (recvedBuffer.length != 0)
         {
-            log("serverGameState: " + recvedBuffer[0]);
-            // log ("current p1.x: " + game.p1.x + " seq: " + seq);
-            log ("current p4.y: " + game.p4.y + " seq: " + seq);
             var s = recvedBuffer[0].split("_");
-            game.ball.x = Number(s[0]);
-            game.ball.y = s[1];
+            // game.ball.x = Number(s[0]);
+            // game.ball.y = Number(s[1]);
         
             // game.p1.x = s[2];
             // game.p1.y = s[3];
@@ -414,8 +612,14 @@ function Loop() {
             game.score4.userID = s[17];
             
             //player 1
-            if (identity == s[14] && constructBuffer.length > 0)
+            if (identity == s[14])
             {
+                // game.p2.x = s[5];
+                // game.p2.y = s[6];
+                // game.p3.x = s[8];
+                // game.p3.y = s[9];
+                // game.p4.x = s[11];
+                // game.p4.y = s[12];
                 var del; 
                 for (var i=0; i<constructBuffer.length; ++i)
                 {
@@ -443,6 +647,12 @@ function Loop() {
             // player 2
             else if (identity == s[15])
             {
+                // game.p1.x = s[2];
+                // game.p1.y = s[3];
+                // game.p3.x = s[8];
+                // game.p3.y = s[9];
+                // game.p4.x = s[11];
+                // game.p4.y = s[12];
                 var del; 
                 for (var i=0; i<constructBuffer.length; ++i)
                 {
@@ -471,6 +681,12 @@ function Loop() {
             //player 3
             else if (identity == s[16])
             {
+                // game.p1.x = s[2];
+                // game.p1.y = s[3];
+                // game.p2.x = s[5];
+                // game.p2.y = s[6];
+                // game.p4.x = s[11];
+                // game.p4.y = s[12];
                 var del; 
                 for (var i=0; i<constructBuffer.length; ++i)
                 {
@@ -497,6 +713,12 @@ function Loop() {
             //player 4
             else if (identity == s[17])
             {
+                // game.p1.x = s[2];
+                // game.p1.y = s[3];
+                // game.p2.x = s[5];
+                // game.p2.y = s[6];
+                // game.p3.x = s[8];
+                // game.p3.y = s[9];
                 var del; 
                 for (var i=0; i<constructBuffer.length; ++i)
                 {
@@ -505,12 +727,10 @@ function Loop() {
                     //check seq
                     if (gs[5][0] == s[21])
                     {
-                        log ("find seq: " + s[21]);
                         del = i;
                         //preicted clientGameState != serverGameState -> re-render
                         if (gs[4][1].toString() !=  s[12])
                         {
-                            log ("incorrect render");
                             game.update(recvedBuffer[0]);
                             game.draw();
                         }
@@ -568,51 +788,4 @@ KeyListener.prototype.addKeyPressListener = function (key)
         if (e.keyCode == keyCode)
             callback(e);
     })
-}
-
-
-
-//======================
-//      Alex Function
-//======================
-
-function getNextState(s1, s2) {
-    var sp1 = s1.split("_");
-    var s1x = sp1[0];
-    var s1y = sp1[1];
-
-    var sp2 = s2.split("_");
-    var s2x = sp2[0];
-    var s2y = sp2[1];
-
-    var ydiff = s2y - s1y;
-    var xdiff = s2x - s1x;
-    var ynew = s2y + ydiff;
-    var xnew = s2x + xdiff;
-    
-    if (ynew < 0) {
-        ynew = -ynew;
-    }
-    //replace with canvas sizes instead of numbers
-    else if(ynew>500){
-        ynew = -(500 - ynew);
-    }
-
-    if (xnew < 0) {
-        xnew = -xnew;
-    }
-    //replace with canvase size instead of numbers
-    else if (xnew > 600) {
-        xnew = -(600 - xnew);
-    }
-
-    var s3 = xnew + "_" + ynew;
-    for (var i = 2; i < 18; i++)
-    {
-        s3 += "_" + sp2[i];
-    }
-    return s3;
-
-    //if want to return just the ball predicted location, would be just xnew and ynew
-
 }
