@@ -20,7 +20,7 @@ var interpolatedBuffer = [];
 var stop = false;
 var now, elapsed;
 var then = 0;
-var fps = 25;
+var fps = 40;
 var fpsInterval = 1000 / fps;
 
 $( "#start" ).click(function() {
@@ -187,13 +187,13 @@ function Interpolation(gs1, gs2)
     
     for (var i = 0; i<4; ++i)
     {
-        if (i = 0)
+        if (i == 0)
             var iX = 2; //2, 5, 8, 11
-        else if (i = 1)
+        else if (i == 1)
             var iX = 5;
-        else if (i = 2)
+        else if (i == 2)
             var iX = 8;
-        else if (i = 3)
+        else if (i == 3)
             var iX = 11;
         var iY = iX+1; //3, 6, 9, 12
         var xDelta = s2[iX] - s1[iX];
@@ -241,8 +241,6 @@ function Interpolation(gs1, gs2)
     result.push(i4);
     result.push(i5);
     result.push(i6);
-
-    log (result);
     
     return result;
 }
@@ -360,25 +358,37 @@ Game.prototype.update = function (payload)
         var input = payload;
         var s = payload.split("_");
         
-        this.ball.x = Number(s[0]);
-        this.ball.y = Number(s[1]);
+        // this.ball.x = Number(s[0]);
+        // this.ball.y = Number(s[1]);
         
-        this.p1.x = Number(s[2]);
-        this.p1.y = Number(s[3]);
-        this.score1.value = Number(s[4]);
+        if (identity == this.p1.userID)
+        {
+            this.p1.x = Number(s[2]);
+            this.p1.y = Number(s[3]);
+            this.score1.value = Number(s[4]);
+        }
+        
+        if (identity == this.p2.userID)
+        {
+            this.p2.x = Number(s[5]);
+            this.p2.y = Number(s[6]);
+            this.score2.value = Number(s[7]);
+        }
+        
+        if (identity == this.p3.userID)
+        {
+            this.p3.x = Number(s[8]);
+            this.p3.y = Number(s[9]);
+            this.score3.value = Number(s[10]);
+        }
 
-        this.p2.x = Number(s[5]);
-        this.p3.y = Number(s[6]);
-        this.score2.value = Number(s[7]);
-
-        this.p3.x = Number(s[8]);
-        this.p3.y = Number(s[9]);
-        this.score3.value = Number(s[10]);
-
-        this.p4.x = Number(s[11]);
-        this.p4.y = Number(s[12]);
-        this.score4.value = Number(s[13]);
-
+        if (identity == this.p4.userID)
+        {
+            this.p4.x = Number(s[11]);
+            this.p4.y = Number(s[12]);
+            this.score4.value = Number(s[13]);
+        }
+        
         this.score1.userID = s[14];
         this.score2.userID = s[15];
         this.score3.userID = s[16];
@@ -386,36 +396,34 @@ Game.prototype.update = function (payload)
 }
 
 Game.prototype.iupdate = function (iGS)
-{
-    log ("iGS: " + iGS);
-        
-        this.ball.x = Number(iGS[0]);
-        this.ball.y = Number(iGS[1]);
+{        
+    this.ball.x = Number(iGS[0]);
+    this.ball.y = Number(iGS[1]);
 
+    
+    if (identity != this.p1.userID)
+    {
+        this.p1.x = Number(iGS[2]);
+        this.p1.y = Number(iGS[3]);
+    }
+    
+    if (identity != this.p2.userID)
+    {
+        this.p2.x = Number(iGS[4]);
+        this.p3.y = Number(iGS[5]);
+    }
         
-        if (identity != this.p1.userID)
-        {
-            this.p1.x = Number(iGS[2]);
-            this.p1.y = Number(iGS[3]);
-        }
-        
-        if (identity != this.p2.userID)
-        {
-            this.p2.x = Number(iGS[4]);
-            this.p3.y = Number(iGS[5]);
-        }
-            
-        if (identity != this.p3.userID)
-        {
-            this.p3.x = Number(iGS[6]);
-            this.p3.y = Number(iGS[7]);
-        }
-        
-        if (identity != this.p4.userID)
-        {
-            this.p4.x = Number(iGS[8]);
-            this.p4.y = Number(iGS[9]);
-        }
+    if (identity != this.p3.userID)
+    {
+        this.p3.x = Number(iGS[6]);
+        this.p3.y = Number(iGS[7]);
+    }
+    
+    if (identity != this.p4.userID)
+    {
+        this.p4.x = Number(iGS[8]);
+        this.p4.y = Number(iGS[9]);
+    }
         
 }
 
@@ -550,16 +558,9 @@ function Loop() {
         renderGS = Interpolation(gs1, gs2);
         for (var i=0; i<renderGS.length; ++i)
         {
-            // log ("inside renderGS: " + i + " " + renderGS[i]);
             var tmp = renderGS[i];
             interpolatedBuffer.push(tmp);
         }
-        // interpolatedBuffer.push(renderGS);
-
-        // for (var i=0; i<interpolatedBuffer.length; ++i)
-        // {
-        //     log ("interpolate: " + i + " " + interpolatedBuffer[i]);
-        // }
         
         toInterpolate.splice(0,2);
     }
@@ -587,51 +588,39 @@ function Loop() {
         if (recvedBuffer.length != 0)
         {
             var s = recvedBuffer[0].split("_");
-            // game.ball.x = Number(s[0]);
-            // game.ball.y = Number(s[1]);
-        
-            // game.p1.x = s[2];
-            // game.p1.y = s[3];
+
             game.score1.value = Number(s[4]);
-
-            // game.p2.x = s[5];
-            // game.p3.y = s[6];
             game.score2.value = Number(s[7]);
-
-            // game.p3.x = s[8];
-            // game.p3.y = s[9];
             game.score3.value = Number(s[10]);
-
-            // game.p4.x = s[11];
-            // game.p4.y = s[12];
             game.score4.value = Number(s[13]);
 
             game.score1.userID = s[14];
             game.score2.userID = s[15];
             game.score3.userID = s[16];
             game.score4.userID = s[17];
+
+            log ("server GameState: " + recvedBuffer[0]);
             
             //player 1
             if (identity == s[14])
             {
-                // game.p2.x = s[5];
-                // game.p2.y = s[6];
-                // game.p3.x = s[8];
-                // game.p3.y = s[9];
-                // game.p4.x = s[11];
-                // game.p4.y = s[12];
                 var del; 
                 for (var i=0; i<constructBuffer.length; ++i)
                 {
                     //the predicted clientGameState to compare
                     var gs = constructBuffer[i];
+
+                    log ("predict GameState: " + gs);
                     //check seq
                     if (gs[5][0] == s[18])
                     {
+                        log ("find the seq");
                         del = i;
                         //preicted clientGameState != serverGameState -> re-render
                         if (gs[1][0].toString() !=  s[2])
                         {
+                            log ("incorrect rendering");
+                            log ("prediction: " + gs[1][0] + " " + "server: " + s[2]);
                             game.update(recvedBuffer[0]);
                             game.draw();
                         }
@@ -647,12 +636,6 @@ function Loop() {
             // player 2
             else if (identity == s[15])
             {
-                // game.p1.x = s[2];
-                // game.p1.y = s[3];
-                // game.p3.x = s[8];
-                // game.p3.y = s[9];
-                // game.p4.x = s[11];
-                // game.p4.y = s[12];
                 var del; 
                 for (var i=0; i<constructBuffer.length; ++i)
                 {
@@ -681,12 +664,6 @@ function Loop() {
             //player 3
             else if (identity == s[16])
             {
-                // game.p1.x = s[2];
-                // game.p1.y = s[3];
-                // game.p2.x = s[5];
-                // game.p2.y = s[6];
-                // game.p4.x = s[11];
-                // game.p4.y = s[12];
                 var del; 
                 for (var i=0; i<constructBuffer.length; ++i)
                 {
@@ -713,12 +690,6 @@ function Loop() {
             //player 4
             else if (identity == s[17])
             {
-                // game.p1.x = s[2];
-                // game.p1.y = s[3];
-                // game.p2.x = s[5];
-                // game.p2.y = s[6];
-                // game.p3.x = s[8];
-                // game.p3.y = s[9];
                 var del; 
                 for (var i=0; i<constructBuffer.length; ++i)
                 {

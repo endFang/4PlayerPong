@@ -18,13 +18,13 @@ using namespace std::chrono;
 //time interval
 // #define INTERVAL_MS 1
 // int interval_clocks = CLOCKS_PER_SEC * INTERVAL_MS / 1000;
-int interval_clocks = CLOCKS_PER_SEC * 1 / 1000;
+int interval_clocks = CLOCKS_PER_SEC * 1 / 100;
 
 
 //received latency
-milliseconds rlatency = milliseconds(500);
+milliseconds rlatency = milliseconds(1000);
 //send latency
-milliseconds slatency = milliseconds(500);
+milliseconds slatency = milliseconds(1000);
 
 
 //latency
