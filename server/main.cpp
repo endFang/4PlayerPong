@@ -18,13 +18,13 @@ using namespace std::chrono;
 //time interval
 // #define INTERVAL_MS 1
 // int interval_clocks = CLOCKS_PER_SEC * INTERVAL_MS / 1000;
-int interval_clocks = CLOCKS_PER_SEC * 1 / 100;
+int interval_clocks = CLOCKS_PER_SEC * 1 / 24;
 
 
 //received latency
-milliseconds rlatency = milliseconds(1000);
+milliseconds rlatency = milliseconds(2000);
 //send latency
-milliseconds slatency = milliseconds(1000);
+milliseconds slatency = milliseconds(2000);
 
 
 //latency
@@ -136,6 +136,9 @@ struct Ball {
 		double radians = angleDegrees * 3.14159265 / 180;
 		velocityX = roundNumber(speed * sin(radians));
 		velocityY = roundNumber(-speed * cos(radians));
+
+		cout << "new velocityX : " << velocityX << endl;
+		cout << "new velocityY : " << velocityY << endl;
 	}
 
 	int roundNumber(double num) {
@@ -489,8 +492,6 @@ int main(int argc, char *argv[]) {
 	//Ball ball;
 	ball.posX = canvas.first / 2;
 	ball.posY = canvas.second / 2;
-	ball.velocityX = 5;
-	ball.velocityY = 5;
 
 	/* set event handler */
 	server.setOpenHandler(openHandler);

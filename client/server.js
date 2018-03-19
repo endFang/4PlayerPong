@@ -20,7 +20,7 @@ var interpolatedBuffer = [];
 var stop = false;
 var now, elapsed;
 var then = 0;
-var fps = 40;
+var fps = 60;
 var fpsInterval = 1000 / fps;
 
 $( "#start" ).click(function() {
@@ -149,7 +149,7 @@ function Interpolation(gs1, gs2)
     var s1 = stn(gs1);
     var s2 = stn(gs2);
     var i1 = [ s1[0], s1[1], s1[2], s1[3], s1[5], s1[6], s1[8], s1[9], s1[11], s1[12] ];
-    var i2=[], i3=[], i4=[], i5=[];
+    var i2 = [], i3 = [], i4 = [], i5 = [], i6 = [], i7 = [], i8 = [], i9 = [], i10 = [];
     
     //ball positive on X
     if (s2[0] > s1[0])
@@ -158,6 +158,14 @@ function Interpolation(gs1, gs2)
         i3.push(s1[0] + 2);
         i4.push(s1[0] + 3);
         i5.push(s1[0] + 4);
+		/*
+        i6.push(s1[0] + 5);
+        i7.push(s1[0] + 6);
+        i8.push(s1[0] + 7);
+        i9.push(s1[0] + 8);
+        i10.push(s1[0] + 9);
+		*/
+
     }
     else
     {
@@ -165,22 +173,43 @@ function Interpolation(gs1, gs2)
         i3.push(s1[0] - 2);
         i4.push(s1[0] - 3);
         i5.push(s1[0] - 4);
+		/*
+        i6.push(s1[0] - 5);
+        i7.push(s1[0] - 6);
+        i8.push(s1[0] - 7);
+        i9.push(s1[0] - 8);
+        i10.push(s1[0] - 9);
+		*/
     }
     
     //ball positive on Y
     if (s2[1] > s1[1])
     {
-        i2.push(s1[1] + 1);
-        i3.push(s1[1] + 2);
-        i4.push(s1[1] + 3);
-        i5.push(s1[1] + 4);
+    	i2.push(s1[1] + 1);
+    	i3.push(s1[1] + 2);
+    	i4.push(s1[1] + 3);
+    	i5.push(s1[1] + 4);
+		/*
+    	i6.push(s1[1] + 5);
+    	i7.push(s1[1] + 6);
+    	i8.push(s1[1] + 7);
+    	i9.push(s1[1] + 8);
+    	i10.push(s1[1] + 9);
+		*/
     }
     else
     {
-        i2.push(s1[1] - 1);
-        i3.push(s1[1] - 2);
-        i4.push(s1[1] - 3);
-        i5.push(s1[1] - 4);
+    	i2.push(s1[1] - 1);
+    	i3.push(s1[1] - 2);
+    	i4.push(s1[1] - 3);
+    	i5.push(s1[1] - 4);
+		/*
+    	i6.push(s1[1] - 5);
+    	i7.push(s1[1] - 6);
+    	i8.push(s1[1] - 7);
+    	i9.push(s1[1] - 8);
+    	i10.push(s1[1] - 9);
+		*/
     }
 
     // log ("calculate player position");
@@ -203,17 +232,31 @@ function Interpolation(gs1, gs2)
         
         if (xDelta >= 0)
         {
-            i2.push(s1[iX] + xDelta);
-            i3.push(s1[iX] + 2*xDelta);
-            i4.push(s1[iX] + 3*xDelta);
-            i5.push(s1[iX] + 4*xDelta);
+            i2.push(s1[iX] + xAct);
+            i3.push(s1[iX] + 2*xAct);
+            i4.push(s1[iX] + 3*xAct);
+            i5.push(s1[iX] + 4 * xAct);
+			/*
+            i6.push(s1[iX] + 5 * xAct);
+            i7.push(s1[iX] + 6 * xAct);
+            i8.push(s1[iX] + 7 * xAct);
+            i9.push(s1[iX] + 8 * xAct);
+            i10.push(s1[iX] + 9 * xAct);
+			*/
         }
         else
         {
-            i2.push(s1[iX] - xDelta);
-            i3.push(s1[iX] - 2*xDelta);
-            i4.push(s1[iX] - 3*xDelta);
-            i5.push(s1[iX] - 4*xDelta);
+        	i2.push(s1[iX] - xAct);
+        	i3.push(s1[iX] - 2 * xAct);
+        	i4.push(s1[iX] - 3 * xAct);
+        	i5.push(s1[iX] - 4 * xAct);
+			/*
+        	i6.push(s1[iX] - 5 * xAct);
+        	i7.push(s1[iX] - 6 * xAct);
+        	i8.push(s1[iX] - 7 * xAct);
+        	i9.push(s1[iX] - 8 * xAct);
+        	i10.push(s1[iX] - 9 * xAct);
+			*/
         }
         
         if (yDelta >= 0)
@@ -221,18 +264,32 @@ function Interpolation(gs1, gs2)
             i2.push(s1[iY] + yAct);
             i3.push(s1[iY] + 2*yAct);
             i4.push(s1[iY] + 3*yAct);
-            i5.push(s1[iY] + 4*yAct);
+            i5.push(s1[iY] + 4 * yAct);
+			/*
+            i6.push(s1[iY] + 5 * yAct);
+            i7.push(s1[iY] + 6 * yAct);
+            i8.push(s1[iY] + 7 * yAct);
+            i9.push(s1[iY] + 8 * yAct);
+            i10.push(s1[iY] + 9 * yAct);
+			*/
         }
         else
         {
-            i2.push(s1[iY] - yAct);
-            i3.push(s1[iY] - 2*yAct);
-            i4.push(s1[iY] - 3*yAct);
-            i5.push(s1[iY] - 4*yAct);
+        	i2.push(s1[iY] - yAct);
+        	i3.push(s1[iY] - 2 * yAct);
+        	i4.push(s1[iY] - 3 * yAct);
+        	i5.push(s1[iY] - 4 * yAct);
+			/*
+        	i6.push(s1[iY] - 5 * yAct);
+        	i7.push(s1[iY] - 6 * yAct);
+        	i8.push(s1[iY] - 7 * yAct);
+        	i9.push(s1[iY] - 8 * yAct);
+        	i10.push(s1[iY] - 9 * yAct);
+			*/
         }
     }
     
-    var i6 = [ s2[0], s2[1], s2[2], s2[3], s2[5], s2[6], s2[8], s2[9], s2[11], s2[12] ];
+    var i11 = [ s2[0], s2[1], s2[2], s2[3], s2[5], s2[6], s2[8], s2[9], s2[11], s2[12] ];
     
     var result = new Array();
     result.push(i1);
@@ -240,7 +297,14 @@ function Interpolation(gs1, gs2)
     result.push(i3);
     result.push(i4);
     result.push(i5);
+	/*
     result.push(i6);
+    result.push(i7);
+    result.push(i8);
+    result.push(i9);
+    result.push(i10);
+	*/
+    result.push(i11);
     
     return result;
 }
@@ -361,28 +425,28 @@ Game.prototype.update = function (payload)
         // this.ball.x = Number(s[0]);
         // this.ball.y = Number(s[1]);
         
-        if (identity == this.p1.userID)
+        if (identity == this.score1.userID)
         {
             this.p1.x = Number(s[2]);
             this.p1.y = Number(s[3]);
             this.score1.value = Number(s[4]);
         }
         
-        if (identity == this.p2.userID)
+        if (identity == this.score2.userID)
         {
             this.p2.x = Number(s[5]);
             this.p2.y = Number(s[6]);
             this.score2.value = Number(s[7]);
         }
         
-        if (identity == this.p3.userID)
+        if (identity == this.score3.userID)
         {
             this.p3.x = Number(s[8]);
             this.p3.y = Number(s[9]);
             this.score3.value = Number(s[10]);
         }
 
-        if (identity == this.p4.userID)
+        if (identity == this.score4.userID)
         {
             this.p4.x = Number(s[11]);
             this.p4.y = Number(s[12]);
@@ -396,35 +460,52 @@ Game.prototype.update = function (payload)
 }
 
 Game.prototype.iupdate = function (iGS)
-{        
+{
+	//log("iGS: " + iGS);
     this.ball.x = Number(iGS[0]);
     this.ball.y = Number(iGS[1]);
 
     
-    if (identity != this.p1.userID)
+    if (identity == this.score1.userID)
     {
-        this.p1.x = Number(iGS[2]);
-        this.p1.y = Number(iGS[3]);
+    	this.p2.x = Number(iGS[4]);
+    	this.p2.y = Number(iGS[5]);
+    	this.p3.x = Number(iGS[6]);
+    	this.p3.y = Number(iGS[7]);
+        this.p4.x = Number(iGS[8]);
+        this.p4.y = Number(iGS[9]);
     }
     
-    if (identity != this.p2.userID)
+    else if (identity == this.score2.userID)
     {
-        this.p2.x = Number(iGS[4]);
-        this.p3.y = Number(iGS[5]);
-    }
-        
-    if (identity != this.p3.userID)
-    {
+    	this.p1.x = Number(iGS[2]);
+    	this.p1.y = Number(iGS[3]);
         this.p3.x = Number(iGS[6]);
         this.p3.y = Number(iGS[7]);
-    }
-    
-    if (identity != this.p4.userID)
-    {
         this.p4.x = Number(iGS[8]);
         this.p4.y = Number(iGS[9]);
     }
         
+    else if (identity == this.score3.userID)
+    {
+    	this.p1.x = Number(iGS[2]);
+    	this.p1.y = Number(iGS[3]);
+    	this.p2.x = Number(iGS[4]);
+    	this.p2.y = Number(iGS[5]);
+        this.p4.x = Number(iGS[8]);
+        this.p4.y = Number(iGS[9]);
+    }
+    
+    else if (identity == this.score4.userID)
+    {
+    	this.p1.x = Number(iGS[2]);
+    	this.p1.y = Number(iGS[3]);
+    	this.p2.x = Number(iGS[4]);
+    	this.p2.y = Number(iGS[5]);
+    	this.p3.x = Number(iGS[6]);
+    	this.p3.y = Number(iGS[7]);
+
+    }
 }
 
 
@@ -551,14 +632,14 @@ function beginLoop() {
 
 //Main game loop
 function Loop() {
-    if (toInterpolate.length >= 2)
+    if (toInterpolate.length >= 3)
     {
         var gs1 = toInterpolate[0], gs2 = toInterpolate[1];
         var renderGS = new Array();
         renderGS = Interpolation(gs1, gs2);
         for (var i=0; i<renderGS.length; ++i)
         {
-            var tmp = renderGS[i];
+        	var tmp = renderGS[i];
             interpolatedBuffer.push(tmp);
         }
         
@@ -576,14 +657,6 @@ function Loop() {
         game.control();
         game.draw();
         
-        //render 1 gs from InterpolationBuffer and discard it
-        if (interpolatedBuffer.length >= 1)
-        {
-            game.iupdate(interpolatedBuffer[0]);
-            game.draw();
-            interpolatedBuffer.splice(0, 1);
-        }
-
         //received serverGameState
         if (recvedBuffer.length != 0)
         {
@@ -599,7 +672,7 @@ function Loop() {
             game.score3.userID = s[16];
             game.score4.userID = s[17];
 
-            log ("server GameState: " + recvedBuffer[0]);
+            //log ("server GameState: " + recvedBuffer[0]);
             
             //player 1
             if (identity == s[14])
@@ -609,18 +682,16 @@ function Loop() {
                 {
                     //the predicted clientGameState to compare
                     var gs = constructBuffer[i];
-
-                    log ("predict GameState: " + gs);
                     //check seq
                     if (gs[5][0] == s[18])
                     {
-                        log ("find the seq");
+                        //log ("find the seq");
                         del = i;
                         //preicted clientGameState != serverGameState -> re-render
                         if (gs[1][0].toString() !=  s[2])
                         {
-                            log ("incorrect rendering");
-                            log ("prediction: " + gs[1][0] + " " + "server: " + s[2]);
+                            //log ("incorrect rendering");
+                            //log ("prediction: " + gs[1][0] + " " + "server: " + s[2]);
                             game.update(recvedBuffer[0]);
                             game.draw();
                         }
@@ -718,6 +789,23 @@ function Loop() {
             {
                 recvedBuffer.splice(0,1);
             }
+
+        	//render 1 gs from InterpolationBuffer and discard it
+            for (var r = 0; r < interpolatedBuffer.length; ++r)
+            {
+            	game.iupdate(interpolatedBuffer[r]);
+            	game.draw();
+            	interpolatedBuffer.splice(0,1);
+            }
+			/*
+            if (interpolatedBuffer.length >= 1) {
+            	game.iupdate(interpolatedBuffer[0]);
+            	game.iupdate(interpolatedBuffer[1]);
+            	game.draw();
+            	interpolatedBuffer.splice(0, 1);
+            }
+			*/
+
         }
     }
     requestAnimationFrame(Loop);
