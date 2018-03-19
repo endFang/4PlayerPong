@@ -464,7 +464,6 @@ Game.prototype.iupdate = function (iGS)
 	//log("iGS: " + iGS);
     this.ball.x = Number(iGS[0]);
     this.ball.y = Number(iGS[1]);
-
     
     if (identity == this.score1.userID)
     {
