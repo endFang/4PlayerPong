@@ -128,7 +128,6 @@ struct Ball {
 			else
 				velocityX = velocityY;
 			velocityY = tempx;
-			//cout << "Velocity: " << velocityX << ", " << velocityY << endl;
 		}
 	}
 
@@ -136,9 +135,6 @@ struct Ball {
 		double radians = angleDegrees * 3.14159265 / 180;
 		velocityX = roundNumber(speed * sin(radians));
 		velocityY = roundNumber(-speed * cos(radians));
-
-		cout << "new velocityX : " << velocityX << endl;
-		cout << "new velocityY : " << velocityY << endl;
 	}
 
 	int roundNumber(double num) {
@@ -249,8 +245,6 @@ void periodicHandler() {
 			 	calculateLatency(latencyType);
 				sendBuffer.push_back(pair<string, time_point<std::chrono::system_clock> >(os.str(), now));
 			}
-			// if (!receivedBuffer.empty())
-			// 	cout << receivedBuffer.front().first << endl;
 			receivedBuffer.erase(receivedBuffer.begin());
 		}
 	}
@@ -303,7 +297,6 @@ void periodicHandler() {
 					{
 						player1.posX = fmin(canvas.first - player1.width, player1.posX + player1.speed);
 						player1.seq = seqNumber;
-						//cout << "player1.seq: " << player1.seq << endl;
 					}
 
 					else if (userID == player2.id)
@@ -447,9 +440,6 @@ void periodicHandler() {
 
 			serverGameState << player1.seq << "_" << player2.seq << "_" << player3.seq << "_" << player4.seq;
 
-			// cout << "constructed string: " << serverGameState.str() << endl;
-
-
 			now = std::chrono::system_clock::now();
 			calculateLatency(latencyType);
 			sendBuffer.push_back(std::pair<std::string, time_point<std::chrono::system_clock> >(serverGameState.str(), now + slatency));
@@ -472,9 +462,7 @@ void periodicHandler() {
 			}
 			if (toSend != -1) {
 				for (int i = 0; i < clientIDs.size(); i++) {
-					//cout << sendBuffer[toSend].first << endl;
 					server.wsSend(clientIDs[i], sendBuffer[toSend].first);
-					cout << sendBuffer[toSend].first << endl;
 				}
 			}
 			for (int i = deletes.size() - 1; i >= 0; i--) {
